@@ -10,6 +10,7 @@
 
 #include "BOARD.h"
 #include "AD.h"
+#include "IO_Ports.h"
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 #include "TapeService.h"
@@ -82,8 +83,6 @@ ES_Event RunTapeService(ES_Event ThisEvent)
 
     switch (ThisEvent.EventType) {
     case ES_INIT:
-        LED_Init() ;
-        LED_AddBanks(LED_BANK1 | LED_BANK2) ;
         break;
     case TAPE_SENSED :
         uint8_t sensorReadings = (uint8_t)ThisEvent.EventParam ; // Typecast the sensor readings as a filthy byte

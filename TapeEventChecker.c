@@ -32,6 +32,9 @@
 #include "ES_Events.h"
 #include "serial.h"
 #include "AD.h"
+#include "IO_Ports.h"
+#include "BOARD.h"
+#include <stdio.h>
 
 /*******************************************************************************
  * MODULE #DEFINES                                                             *
@@ -85,13 +88,25 @@ uint8_t TapeCheck(void) {
     static uint16_t lastTapeRead = 0x0000 ;
     uint16_t tapeReadings = 0x0000 ;
     
+    //printf("sensor 1: %x\n", IO_PortsReadPort(PORTY));
+    //tapeReadings = IO_PortsReadPort(PORTY);
+    
+    printf("%x\n", AD_ReadADPin(TAPESENSOR1));
+    /*
     for(uint8_t i = 0 ; i < 6 ; i++) {
         // Read sensors sequentially.
-        if(AD_ReadADPin(sensorBank[i]) > BLACK_THRESH) { // CHECK IF BLACK. IF WHITE DO NOTHING. (?)
+        
+        unsigned int data = AD_ReadADPin(sensorBank[i]) ;
+        printf("TC[%u]: %x\n", i + 1, data) ;
+        //if(AD_ReadADPin(sensorBank[i]) > BLACK_THRESH) { // CHECK IF BLACK. IF WHITE DO NOTHING. (?)
+        if(data > BLACK_THRESH) {
+            //printf("sensor %u: data = %x\n", i, data) ;
             uint16_t X = 0x0001 << i; 
             tapeReadings |= X;
         }
     }
+    */
+    //printf("TAPE: %x\n", tapeReadings) ;
     
     if (!(lastTapeRead ^ tapeReadings)) { // check for change from last time
         thisEvent.EventType = TAPE_SENSED ;

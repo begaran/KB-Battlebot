@@ -34,13 +34,12 @@
 #include "AD.h"
 #include "IO_Ports.h"
 #include "BOARD.h"
+#include "xc.h"
 #include <stdio.h>
 
 /*******************************************************************************
  * MODULE #DEFINES                                                             *
  ******************************************************************************/
-
-#define BLACK_THRESH 100
 
 /*******************************************************************************
  * EVENTCHECKER_TEST SPECIFIC CODE                                                             *
@@ -68,47 +67,34 @@ static ES_Event storedEvent;
    events would be placed here. Private variables should be STATIC so that they
    are limited in scope to this module. */
 
-   unsigned int sensorBank[6] = { // these are in TapeEventChecker.h
-       TAPESENSOR1,
-       TAPESENSOR2,
-       TAPESENSOR3,
-       TAPESENSOR4,
-       TAPESENSOR5,
-       TAPESENSOR6
-   } ;
-
 /*******************************************************************************
  * PUBLIC FUNCTIONS                                                            *
  ******************************************************************************/
 
 
 uint8_t TapeCheck(void) {
+    // initialization
     ES_Event thisEvent;
     uint8_t returnVal = FALSE;
     static uint16_t lastTapeRead = 0x0000 ;
     uint16_t tapeReadings = 0x0000 ;
-    
-    //printf("sensor 1: %x\n", IO_PortsReadPort(PORTY));
-    //tapeReadings = IO_PortsReadPort(PORTY);
-    
-    printf("%x\n", AD_ReadADPin(TAPESENSOR1));
-    /*
-    for(uint8_t i = 0 ; i < 6 ; i++) {
-        // Read sensors sequentially.
-        
-        unsigned int data = AD_ReadADPin(sensorBank[i]) ;
-        printf("TC[%u]: %x\n", i + 1, data) ;
-        //if(AD_ReadADPin(sensorBank[i]) > BLACK_THRESH) { // CHECK IF BLACK. IF WHITE DO NOTHING. (?)
-        if(data > BLACK_THRESH) {
-            //printf("sensor %u: data = %x\n", i, data) ;
-            uint16_t X = 0x0001 << i; 
-            tapeReadings |= X;
-        }
-    }
-    */
-    //printf("TAPE: %x\n", tapeReadings) ;
-    
-    if (!(lastTapeRead ^ tapeReadings)) { // check for change from last time
+   
+    // read ports
+    if(PORTY06_BIT) tapeReadings |= 0x0001 ;
+    // printf("[1]: %x\n", PORTY06_BIT) ;
+    if(PORTY07_BIT) tapeReadings |= 0x0002 ;
+    // printf("[2]: %x\n", PORTY07_BIT) ;
+    if(PORTY08_BIT) tapeReadings |= 0x0004 ;  
+    // printf("[3]: %x\n", PORTY08_BIT) ;
+    if(PORTY09_BIT) tapeReadings |= 0x0008 ;  
+    // printf("[4]: %x\n", PORTY09_BIT) ;
+    if(PORTY10_BIT) tapeReadings |= 0x0010 ;  
+    // printf("[5]: %x\n", PORTY10_BIT) ;
+    if(PORTY11_BIT) tapeReadings |= 0x0020 ;  
+    // printf("[6]: %x\n", PORTY11_BIT) ;
+
+    // check if changed
+    if (lastTapeRead != tapeReadings) { // check for change from last time
         thisEvent.EventType = TAPE_SENSED ;
         thisEvent.EventParam = tapeReadings;
         returnVal = TRUE;

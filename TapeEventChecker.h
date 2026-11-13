@@ -13,17 +13,20 @@
 #include "ES_Configure.h"   // defines ES_Event, INIT_EVENT, ENTRY_EVENT, and EXIT_EVENT
 #include "BOARD.h"
 #include "AD.h"
+#include "xc.h"
 
 /*******************************************************************************
  * PUBLIC #DEFINES                                                             *
  ******************************************************************************/
 
-#define TAPESENSOR1 AD_PORTV3
-#define TAPESENSOR2 AD_PORTV4
-#define TAPESENSOR3 AD_PORTV5
-#define TAPESENSOR4 AD_PORTV6
-#define TAPESENSOR5 AD_PORTV7
-#define TAPESENSOR6 AD_PORTV8
+/*
+#define TAPESENSOR1 PORTY06_BIT
+#define TAPESENSOR2 PORTY07_BIT
+#define TAPESENSOR3 PORTY08_BIT
+#define TAPESENSOR4 PORTY09_BIT
+#define TAPESENSOR5 PORTY10_BIT
+#define TAPESENSOR6 PORTY11_BIT
+*/
 
 /*******************************************************************************
  * PUBLIC TYPEDEFS                                                             *

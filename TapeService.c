@@ -87,19 +87,26 @@ ES_Event RunTapeService(ES_Event ThisEvent)
     case TAPE_SENSED :
         uint8_t sensorReadings = (uint8_t)ThisEvent.EventParam ; // Typecast the sensor readings as a filthy byte
         LED_SetBank(LED_BANK1, (unsigned char)sensorReadings) ;
-        if(sensorReadings & 0x0008 || sensorReadings & 0x0007) { // Tape Sensor 4 or 1, 2, 3
+        printf("sensors: 0x%x\n", sensorReadings) ;
+        if(sensorReadings & 0x08 || !(sensorReadings ^ 0x07)) { // Tape Sensor 4 or 1, 2, 3
             revolutionTurn(RIGHT);
-            LED_SetBank(LED_BANK2, 0xFF) ;
-        } else if (!(sensorReadings ^ 0x0001) || !(sensorReadings ^ 0x0005)) { // 0001 or 0101
+            LED_SetBank(LED_BANK3, 0xFF) ;
+        /*
+        } else {
+            driveTurn(LEFT);
+            LED_SetBank(LED_BANK3, 0x33) ;
+        }
+            */
+        } else if (!(sensorReadings ^ 0x01) || !(sensorReadings ^ 0x05)) { // 0001 or 0101
             move(FORWARD) ;
-            LED_SetBank(LED_BANK2, 0xA5) ;
-        } else if (!(sensorReadings ^ 0x0002) || !(sensorReadings ^ 0x0006)) { // 0010 or 0110
+            LED_SetBank(LED_BANK3, 0xA5) ;
+        } else if (!(sensorReadings ^ 0x02) || !(sensorReadings ^ 0x06)) { // 0010 or 0110
             driveTurn(RIGHT) ;
-            LED_SetBank(LED_BANK2, 0x0F) ;
+            LED_SetBank(LED_BANK3, 0x0F) ;
         } else {
             driveTurn(LEFT) ;
-            LED_SetBank(LED_BANK2, 0xF0) ;
-        }
+            LED_SetBank(LED_BANK3, 0xF0) ;
+        } 
         break;
 #ifdef SIMPLESERVICE_TEST     // keep this as is for test harness      
     default:

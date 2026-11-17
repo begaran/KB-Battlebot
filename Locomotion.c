@@ -20,7 +20,7 @@
 #define BACKWARD 3
 #define NORM_SPEED 50
 #define MAX_VOLTAGE 9.9
-#define STOPTIME 10000
+#define STOPTIME 1000
 
 // author: jdgrant 
 
@@ -54,7 +54,7 @@ void motorInit(void) {
 
 // straight lateral movement
 void move(int direction) {
-   //stopMotor() ;
+   stopMotor() ;
    printf("moving %d\n", direction) ;
    if(direction == FORWARD) {
     motorForward(LEFT);
@@ -71,13 +71,12 @@ void move(int direction) {
 
 // tank turn, simple revolution
 void revolutionTurn(int direction) {
-   //stopMotor() ;
+   stopMotor() ;
    printf("tank turn %d\n", direction) ;
    if(direction == LEFT) {
     motorForward(RIGHT);
     motorBackward(LEFT);
    } else {
-       printf("tank turning left\n") ;
     motorForward(LEFT);
 	motorBackward(RIGHT);
    }
@@ -88,13 +87,22 @@ void revolutionTurn(int direction) {
 
 // drives forward with a bias 
 void driveTurn(int direction) {
-    //stopMotor() ;
+    stopMotor() ;
     printf("drive turn %d\n", direction) ;
     motorForward(LEFT) ;
     motorForward(RIGHT) ;
 	setMotorSpeed(LEFT, direction == LEFT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
 	setMotorSpeed(RIGHT, direction == LEFT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/4)) ;
    return ;
+}
+
+void backTurn(int direction) {
+    stopMotor() ;
+    printf("back turn %d\n", direction) ;
+    motorBackward(LEFT) ;
+    motorBackward(RIGHT) ;
+    setMotorSpeed(LEFT, direction == RIGHT ? NORM_SPEED - (NORM_SPEED/2) : NORM_SPEED + (NORM_SPEED/4)) ;
+	setMotorSpeed(RIGHT, direction == RIGHT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/2)) ;
 }
 
 // changes directions of motors, does not change PWM (speed)

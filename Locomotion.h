@@ -27,11 +27,14 @@
 #define BACKWARD 3
 #define NORM_SPEED 50
 #define MAX_VOLTAGE 9.9
+#define STOPTIME 1000
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
+    void stopMotor(void) ;
+    
     void motorInit() ;
     
     void move(int direction) ;
@@ -39,6 +42,8 @@ extern "C" {
     void revolutionTurn(int direction) ;
     
     void driveTurn(int direction) ;
+    
+    void backTurn(int direction) ;
     
     void motorForward(int lr) ;
     

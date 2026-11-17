@@ -8,6 +8,15 @@
 #include "Locomotion.h"
 #include "pwm.h"
 #include "timers.h"
+#include "RC_Servo.h"
+
+// PORTS THAT WORK: 
+// X
+// 10, 11, 12
+// Y
+// 6, 7, 8, 9, 10, 11, 12
+// Z
+// 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
 
 
 void main(void)
@@ -21,7 +30,7 @@ void main(void)
     AD_Init();
     TIMERS_Init();
 
-    printf("Initializing KB BATTLEBOT ... \nPROTOCOL: Tape Drive\n");
+    printf("Initializing KB BATTLEBOT ... \nPROTOCOL: Tape Drive, Bumper Extension\n\n");
     
     // set the _TRIS registers to input for each tape sensor. 
     PORTY06_TRIS = 1 ; // Tape sensor 1 output
@@ -33,7 +42,7 @@ void main(void)
     
     // bumper sensors
     PORTZ09_TRIS = 1 ; // Left Front Bumper
-    PORTZ10_TRIS = 1 ; // Right Front Bumper
+    PORTZ03_TRIS = 1 ; // Right Front Bumper
     PORTZ11_TRIS = 1 ; // Left Back Bumper
     PORTZ12_TRIS = 1 ; // Right Back Bumper
     
@@ -45,12 +54,15 @@ void main(void)
     
     // more hardware init
     LED_Init() ;
-    LED_AddBanks(LED_BANK1 | LED_BANK3) ;
+    LED_AddBanks(LED_BANK1 | LED_BANK2 | LED_BANK3) ;
 
     PWM_AddPins(PWM_PORTZ06) ; // H-bridge ENA
     PWM_AddPins(PWM_PORTX11) ; // H-bridge ENB
     
-    // for motors, Z6, 7, 8 is similiar to X11, 12, 10
+    RC_Init() ;
+    RC_AddPins(RC_PORTW07) ;
+    
+    // for motors, Z6, 7, 8 is similar to X11, 12, 10
     
     /* MOTOR TEST CODE - TIMER
     while(1) {

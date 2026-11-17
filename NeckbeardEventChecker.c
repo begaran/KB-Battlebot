@@ -91,10 +91,10 @@ uint8_t BumperCheck(void) {
     unsigned int currentTime = ES_Timer_GetTime() ; // timer for debouncing
     static unsigned int prevTime = 0 ;
 
-    if(!PORTZ09_BIT) bumperReadings |= 0b0001 ; 
-    if(!PORTZ10_BIT) bumperReadings |= 0b0010 ; 
-    if(!PORTZ11_BIT) bumperReadings |= 0b0100 ; 
-    if(!PORTZ12_BIT) bumperReadings |= 0b1000 ; 
+    if(!PORTZ09_BIT) bumperReadings |= 0b0001 ; // left front
+    if(!PORTZ03_BIT) bumperReadings |= 0b0010 ; // right front
+    if(!PORTZ11_BIT) bumperReadings |= 0b0100 ; // left back
+    if(!PORTZ12_BIT) bumperReadings |= 0b1000 ; // right back
 
     //printf("cur: %x, last: %x\n", bumperReadings, lastBumperRead) ;
     if(lastBumperRead != bumperReadings) {

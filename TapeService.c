@@ -13,6 +13,7 @@
 #include "IO_Ports.h"
 #include "ES_Configure.h"
 #include "ES_Framework.h"
+#include "ES_Timers.h"
 #include "TapeService.h"
 #include "NeckbeardEventChecker.h"
 #include "Locomotion.h"
@@ -23,7 +24,10 @@
  * MODULE #DEFINES                                                             *
  ******************************************************************************/
 
-#define BT 4000 // time in milliseconds for obstacle avoidance 
+#define BT (2)*1024             // time in milliseconds for obstacle avoidance.
+#define AVOIDTIMER 1            // timer for bump maneuvers
+#define TT 1500
+#define TURNTIMER 0
 
 /*******************************************************************************
  * PRIVATE FUNCTION PROTOTYPES                                                 *
@@ -32,9 +36,11 @@
 /*******************************************************************************
  * PRIVATE MODULE VARIABLES                                                    *
  ******************************************************************************/
-static uint8_t bumpTime = BT;
-static uint8_t MyPriority;
-
+static uint16_t bumpTime = BT ;   // initial time that the bot spends moving away from obstacles
+uint16_t turnTime = TT ;
+uint8_t curTape ;
+uint8_t curBump ;
+static uint8_t MyPriority ;
 /*******************************************************************************
  * PUBLIC FUNCTIONS                                                            *
  ******************************************************************************/
@@ -42,6 +48,12 @@ static uint8_t MyPriority;
 uint8_t InitTapeService(uint8_t Priority) {
     ES_Event ThisEvent;
     MyPriority = Priority;
+    
+    ES_Timer_Init() ;
+    //ES_Timer_InitTimer(TURNTIMER, 500) ;
+    ES_Timer_InitTimer(AVOIDTIMER, BT) ;
+    ES_Timer_StopTimer(AVOIDTIMER) ;
+    ES_Timer_StopTimer(TURNTIMER) ;
 
     ThisEvent.EventType = ES_INIT;
     if (ES_PostToService(MyPriority, ThisEvent) == TRUE) {
@@ -66,9 +78,11 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
     switch (ThisEvent.EventType) {
     case ES_INIT :
         break;
+        
     case TAPE_SENSED :
         uint8_t sensorReadings = (uint8_t)ThisEvent.EventParam ; // Typecast the sensor readings as a filthy byte
         LED_SetBank(LED_BANK1, (unsigned char)sensorReadings) ;
+        curTape = sensorReadings ;
         printf("sensors: 0x%x\n", sensorReadings) ;
         if(sensorReadings & 0x08 || !(sensorReadings ^ 0x07)) { // Tape Sensor 4 or 1, 2, 3
             // 1xxx, 0111
@@ -80,22 +94,56 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
             LED_SetBank(LED_BANK3, 0xA5) ;
         } else if (!(sensorReadings ^ 0x02) || !(sensorReadings ^ 0x06)) { 
             // 0010, 0110
-            driveTurn(RIGHT) ;
+            // driveTurn(RIGHT) ;
+            move(FORWARD) ;
             LED_SetBank(LED_BANK3, 0x0F) ;
         } else {
-            // 0011, 0100
+            // 0000, 0011, 0100
             driveTurn(LEFT) ;
             LED_SetBank(LED_BANK3, 0xF0) ;
         } 
         break;
+        
     case BUMPER_HIT : 
         uint8_t bumperReadings = (uint8_t)ThisEvent.EventParam ; // Bytecast
         LED_SetBank(LED_BANK2, (unsigned char)bumperReadings) ;
+        curBump = bumperReadings ;
         printf("bumpers: 0x%x\n", bumperReadings) ;
-        if(bumperReadings & 0b0001) printf("LF\n") ;
-        if(bumperReadings & 0b0010) printf("RF\n") ;
-        if(bumperReadings & 0b0100) printf("LB\n") ;
-        if(bumperReadings & 0b1000) printf("RB\n") ;
+        
+        if(bumperReadings & 0b0011) {
+            printf("Front hit\n") ;
+            bumpTime /= 2 ;
+            backTurn(RIGHT) ;
+            ES_Timer_SetTimer(AVOIDTIMER, bumpTime) ;
+            ES_Timer_StartTimer(AVOIDTIMER) ;
+        }
+        if(bumperReadings & 0b1100) {
+            printf("Back hit\n") ;
+            bumpTime /= 2 ;
+            backTurn(RIGHT) ;
+            ES_Timer_SetTimer(AVOIDTIMER, bumpTime) ;
+            ES_Timer_StartTimer(AVOIDTIMER) ;
+        }     
+        
+        break ;
+        
+    case ES_TIMEOUT :
+        if(ThisEvent.EventParam == AVOIDTIMER) {
+            //printf("Avoid timer TIMEOUT\n") ;
+            bumpTime = BT ;
+            // revolutionTurn(RIGHT) ;
+            driveTurn(LEFT) ; // may need to change this to check tape
+            ES_Timer_SetTimer(TURNTIMER, turnTime) ;
+            ES_Timer_StartTimer(TURNTIMER) ;
+        } else if(ThisEvent.EventParam == TURNTIMER) {
+            //printf("Turn timer TIMEOUT\n") ;
+            //TapeCheck() ; // might be quite dangerous
+            // if robot stays on same tape whole time, it won't get a TAPE_SENSED event
+        }
+        
+        
+        break ;
+
             
 #ifdef SIMPLESERVICE_TEST     // keep this as is for test harness      
     default:

@@ -14,49 +14,69 @@ void main(void)
 {
     ES_Return_t ErrorType;
 
+    // initialization
     BOARD_Init();
-    motorInit();
+    motorInit(); // from Locomotion.c/h
     PWM_Init();
     AD_Init();
     TIMERS_Init();
 
     printf("Initializing KB BATTLEBOT ... \nPROTOCOL: Tape Drive\n");
-
-    // Your hardware initialization function calls go here
-    // PWM_SetFrequency(PWM_DEFAULT_FREQUENCY) ;
     
     // set the _TRIS registers to input for each tape sensor. 
-    PORTY06_TRIS = 1 ;
-    PORTY07_TRIS = 1 ;
-    PORTY08_TRIS = 1 ;
-    PORTY09_TRIS = 1 ;
-    PORTY10_TRIS = 1 ;
-    PORTY11_TRIS = 1 ;
+    PORTY06_TRIS = 1 ; // Tape sensor 1 output
+    PORTY07_TRIS = 1 ; // Tape sensor 2 output
+    PORTY08_TRIS = 1 ; // Tape sensor 3 output
+    PORTY09_TRIS = 1 ; // Tape sensor 4 output
+    PORTY10_TRIS = 1 ; // Tape sensor 5 output
+    PORTY11_TRIS = 1 ; // Tape sensor 6 output
     
-    PORTZ07_TRIS = 0 ;
-    PORTZ08_TRIS = 0 ;
-    PORTX12_TRIS = 0 ;
-    PORTX10_TRIS = 0 ;
-
+    // bumper sensors
+    PORTZ09_TRIS = 1 ; // Left Front Bumper
+    PORTZ10_TRIS = 1 ; // Right Front Bumper
+    PORTZ11_TRIS = 1 ; // Left Back Bumper
+    PORTZ12_TRIS = 1 ; // Right Back Bumper
+    
+    // motor outputs
+    PORTZ07_TRIS = 0 ; // H-bridge IN1
+    PORTZ08_TRIS = 0 ; // H-bridge IN2
+    PORTX12_TRIS = 0 ; // H-bridge IN3
+    PORTX10_TRIS = 0 ; // H-bridge IN4
+    
+    // more hardware init
     LED_Init() ;
     LED_AddBanks(LED_BANK1 | LED_BANK3) ;
 
-    PWM_AddPins(PWM_PORTZ06) ;
-    PWM_AddPins(PWM_PORTX11) ;
+    PWM_AddPins(PWM_PORTZ06) ; // H-bridge ENA
+    PWM_AddPins(PWM_PORTX11) ; // H-bridge ENB
     
+    // for motors, Z6, 7, 8 is similiar to X11, 12, 10
+    
+    /* MOTOR TEST CODE - TIMER
+    while(1) {
+        revolutionTurn(RIGHT) ;
+        stopMotor() ;
+        revolutionTurn(LEFT) ;
+    }
+     */
+    
+    /* PORT TEST CODE
+    while(1) {
+        printf("%x\n", PORTZ09_BIT) ;
+    }
+     */
+    
+    // MOTOR TEST CODE - DIRECTION
     //PWM_SetDutyCycle(PWM_PORTX11, 600) ; // this goes backwards on the left wheel
     //PORTX12_BIT = 1;
     //PORTX10_BIT = 0;
     //PWM_SetDutyCycle(PWM_PORTZ06, 600) ; // this goes backwards on the right wheel
     //PORTZ07_BIT = 1;
     //PORTZ08_BIT = 0;
-    
     // motorBackward(1) ;
-    // setMotorSpeed(1, 50) ;
+    // setMotorSpeed(1, 50) ;    
     
-    
-    // now initialize the Events and Services Framework and start it running
-    
+    // nominal program
     ErrorType = ES_Initialize();
     if (ErrorType == Success) {
         ErrorType = ES_Run();
@@ -77,6 +97,7 @@ void main(void)
     
     for (;;)
         ;
+    
 };
 
 /*------------------------------- Footnotes -------------------------------*/

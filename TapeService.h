@@ -13,7 +13,7 @@
  ******************************************************************************/
 
 #include "ES_Configure.h"   // defines ES_Event, INIT_EVENT, ENTRY_EVENT, and EXIT_EVENT
-#include "TapeEventChecker.h"
+#include "NeckbeardEventChecker.h"
 #include "ES_Events.h"
 
 /*******************************************************************************
@@ -36,7 +36,7 @@ uint8_t InitTapeService(uint8_t Priority);
 
 
 // Post
-uint8_t PostTapeService(ES_Event ThisEvent);
+uint8_t PostNeckbeardService(ES_Event ThisEvent);
 
 
 // Run

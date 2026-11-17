@@ -23,7 +23,7 @@
 //#define POSTFUNCTION_FOR_KEYBOARD_INPUT PostGenericService
 
 //define for TattleTale
-#define USE_TATTLETALE
+//#define USE_TATTLETALE
 
 //uncomment to supress the entry and exit events
 //#define SUPPRESS_EXIT_ENTRY_IN_TATTLE
@@ -45,6 +45,7 @@ typedef enum {
     ES_TIMERSTOPPED, /* signals that a timer has stopped*/
     /* User-defined events start here */
     TAPE_SENSED,
+    BUMPER_HIT,     
 	/* User-defined events end here */
     NUMBEROFEVENTS,
 } ES_EventTyp_t;
@@ -61,6 +62,7 @@ static const char *EventNames[] = {
 	"ES_TIMERACTIVE",
 	"ES_TIMERSTOPPED",
     "TAPE_SENSED",
+    "BUMPER_HIT",
 	"NUMBEROFEVENTS",
 };
 
@@ -69,11 +71,11 @@ static const char *EventNames[] = {
 
 /****************************************************************************/
 // This are the name of the Event checking function header file.
-#define EVENT_CHECK_HEADER "TapeEventChecker.h"
+#define EVENT_CHECK_HEADER "NeckbeardEventChecker.h"
 
 /****************************************************************************/
 // This is the list of event checking functions
-#define EVENT_CHECK_LIST TapeCheck
+#define EVENT_CHECK_LIST TapeCheck, BumperCheck
 
 /****************************************************************************/
 // These are the definitions for the post functions to be executed when the
@@ -148,11 +150,11 @@ static const char *EventNames[] = {
 // These are the definitions for Service 2
 #if NUM_SERVICES > 2
 // the header file with the public function prototypes
-#define SERV_2_HEADER "TestService.h"
+#define SERV_2_HEADER "BumperFSM.h"
 // the name of the Init function
-#define SERV_2_INIT TestServiceInit
+#define SERV_2_INIT InitBumperFSM
 // the name of the run function
-#define SERV_2_RUN TestServiceRun
+#define SERV_2_RUN RunBumperFSM
 // How big should this services Queue be?
 #define SERV_2_QUEUE_SIZE 3
 #endif

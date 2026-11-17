@@ -20,9 +20,12 @@
 #define BACKWARD 3
 #define NORM_SPEED 50
 #define MAX_VOLTAGE 9.9
-
+#define STOPTIME 10000
 
 // author: jdgrant 
+
+
+// stops motor (WIP, NOT YET IMPLEMENTED)
 void stopMotor(void) {
     setMotorSpeed(LEFT, 0);
     setMotorSpeed(RIGHT, 0);
@@ -30,11 +33,12 @@ void stopMotor(void) {
     while(TIMERS_IsTimerExpired(0xFF) == TIMER_NOT_ACTIVE) {
         ;
     }
-    TIMERS_StopTimer(0xFF) ;
-    TIMERS_SetTimer(0xFF, 10) ;
+    //TIMERS_StopTimer(0xFF) ;
+    TIMERS_SetTimer(0xFF, STOPTIME) ;
     return ;
 }
 
+// initiates pins used and a timer
 void motorInit(void) {
    PORTZ07_LAT = 0 ;
    PORTZ08_LAT = 0 ;
@@ -43,13 +47,14 @@ void motorInit(void) {
    
    PWM_AddPins(PWM_PORTZ06);
    PWM_AddPins(PWM_PORTX11);
-   TIMERS_InitTimer(0xFF, 10);
+   TIMERS_InitTimer(0xFF, STOPTIME);
    
    return ;
 }
 
+// straight lateral movement
 void move(int direction) {
-   stopMotor(void) ;
+   //stopMotor() ;
    printf("moving %d\n", direction) ;
    if(direction == FORWARD) {
     motorForward(LEFT);
@@ -64,13 +69,15 @@ void move(int direction) {
    return ;
 }
 
+// tank turn, simple revolution
 void revolutionTurn(int direction) {
-   stopMotor(void) ;
+   //stopMotor() ;
    printf("tank turn %d\n", direction) ;
    if(direction == LEFT) {
     motorForward(RIGHT);
     motorBackward(LEFT);
    } else {
+       printf("tank turning left\n") ;
     motorForward(LEFT);
 	motorBackward(RIGHT);
    }
@@ -79,8 +86,9 @@ void revolutionTurn(int direction) {
    return ;
 }
 
+// drives forward with a bias 
 void driveTurn(int direction) {
-    stopMotor(void) ;
+    //stopMotor() ;
     printf("drive turn %d\n", direction) ;
     motorForward(LEFT) ;
     motorForward(RIGHT) ;
@@ -89,9 +97,10 @@ void driveTurn(int direction) {
    return ;
 }
 
+// changes directions of motors, does not change PWM (speed)
 void motorForward(int lr) {
 	if (lr == RIGHT) {
-		PORTZ07_BIT = 0;
+		PORTZ07_BIT = 0; 
         PORTZ08_BIT = 1;
 	} else {   
         PORTX12_BIT = 0;
@@ -100,6 +109,7 @@ void motorForward(int lr) {
 	return;
 }
 
+// changes directions of motors, does not change PWM (speed)
 void motorBackward(int lr) {
 	if (lr == RIGHT) {
 		PORTZ07_BIT = 1;
@@ -111,8 +121,9 @@ void motorBackward(int lr) {
 	return;
 }
 
+// sets the PWM duty cycles (speed). Does not touch the directions of the motors
 void setMotorSpeed(int lr, int speed) {
-    
+    // ripped from github
     uint16_t batVoltage = (AD_ReadADPin(BAT_VOLTAGE) * 33) / 1023 ; 
 	if(speed > 50) {
         speed = 50 ;
@@ -123,7 +134,6 @@ void setMotorSpeed(int lr, int speed) {
     speed = speed * 10 ; 
     speed = speed * MAX_VOLTAGE/batVoltage ;
      
- 
     if (lr == RIGHT) {
 		PWM_SetDutyCycle(PWM_PORTZ06, speed) ;
 	} else {

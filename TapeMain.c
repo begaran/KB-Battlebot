@@ -75,13 +75,13 @@ void main(void)
     
     // for motors, Z6, 7, 8 is similar to X11, 12, 10
     
-    /* MOTOR TEST CODE - TIMER
+    /* MOTOR TEST CODE - TIMER 
     while(1) {
         revolutionTurn(RIGHT) ;
-        stopMotor() ;
+        for(uint32_t i = 0; i < 1 << 16; i++) ;
         revolutionTurn(LEFT) ;
     }
-     */
+    */
     
     /* PORT TEST CODE
     while(1) {

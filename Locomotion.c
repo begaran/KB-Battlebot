@@ -1,3 +1,8 @@
+/* Locomotion.c
+ * Drives the H-bridge that drives the motors
+ */
+
+/* INCLUDES */
 #include "BOARD.h"
 #include "xc.h"
 #include "IO_Ports.h"
@@ -8,33 +13,23 @@
 #include <stdio.h>
 #include "timers.h"
 
-#define PWM_LEFT_MOTOR   PWM_PORTZ06 // ENA 
-#define PWM_RIGHT_MOTOR  PWM_PORTX11 // ENB
-#define DIR_LEFT_MOTOR   PORTZ07_BIT // IN1
-#define NDIR_LEFT_MOTOR  PORTZ08_BIT // IN2
-#define DIR_RIGHT_MOTOR  PORTX12_BIT // IN3
-#define NDIR_RIGHT_MOTOR PORTX09_BIT // IN4
-#define RIGHT 1
-#define LEFT 0
-#define FORWARD 2
-#define BACKWARD 3
+/* DEFINES */
 #define NORM_SPEED 50
-#define MAX_VOLTAGE 9.9
-#define STOPTIME 1000
+#define STOPTIME 500
 
 // author: jdgrant 
 
-
-// stops motor (WIP, NOT YET IMPLEMENTED)
-void stopMotor(void) {
+// stops motor 
+void stopMotor(unsigned int time) {
     setMotorSpeed(LEFT, 0);
     setMotorSpeed(RIGHT, 0);
-    TIMERS_StartTimer(0xFF) ;
-    while(TIMERS_IsTimerExpired(0xFF) == TIMER_NOT_ACTIVE) {
+    TIMERS_InitTimer(0x01, time) ;
+    TIMERS_StartTimer(0x01) ;
+    printf("started timer\n") ;
+    while(TIMERS_IsTimerExpired(0x01) == TIMER_NOT_ACTIVE) {
         ;
     }
-    //TIMERS_StopTimer(0xFF) ;
-    TIMERS_SetTimer(0xFF, STOPTIME) ;
+    printf("timer expired\n") ;
     return ;
 }
 
@@ -47,14 +42,14 @@ void motorInit(void) {
    
    PWM_AddPins(PWM_PORTZ06);
    PWM_AddPins(PWM_PORTX11);
-   TIMERS_InitTimer(0xFF, STOPTIME);
+   TIMERS_InitTimer(0x01, STOPTIME);
    
    return ;
 }
 
 // straight lateral movement
 void move(int direction) {
-   stopMotor() ;
+   stopMotor(STOPTIME) ;
    printf("moving %d\n", direction) ;
    if(direction == FORWARD) {
     motorForward(LEFT);
@@ -71,7 +66,7 @@ void move(int direction) {
 
 // tank turn, simple revolution
 void revolutionTurn(int direction) {
-   stopMotor() ;
+   stopMotor(STOPTIME) ;
    printf("tank turn %d\n", direction) ;
    if(direction == LEFT) {
     motorForward(RIGHT);
@@ -87,7 +82,7 @@ void revolutionTurn(int direction) {
 
 // drives forwards with a bias 
 void driveTurn(int direction) {
-    stopMotor() ;
+    stopMotor(STOPTIME) ;
     printf("drive turn %d\n", direction) ;
     motorForward(LEFT) ;
     motorForward(RIGHT) ;
@@ -98,7 +93,7 @@ void driveTurn(int direction) {
 
 // drives backwards with a bias
 void backTurn(int direction) {
-    stopMotor() ;
+    stopMotor(STOPTIME) ;
     printf("back turn %d\n", direction) ;
     motorBackward(LEFT) ;
     motorBackward(RIGHT) ;

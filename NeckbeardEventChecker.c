@@ -38,22 +38,13 @@
 #define TLO 400             // track lo
 #define THI 600             // track hi 
 #define BML 400             // beacon mid lo
-#define BMH 500             // beacon mid hi
-#define BHL 600             // beacon hi lo (possibly unused) 
+#define BMH 600             // beacon mid hi
+#define BHL 700             // beacon hi lo 
 #define BHH 800             // beacon hi hi
 
 /*******************************************************************************
  * EVENTCHECKER_TEST SPECIFIC CODE                                                             *
  ******************************************************************************/
-
-//#define EVENTCHECKER_TEST
-#ifdef EVENTCHECKER_TEST
-#include <stdio.h>
-#define SaveEvent(x) do {eventName=__func__; storedEvent=x;} while (0)
-
-static const char *eventName;
-static ES_Event storedEvent;
-#endif
 
 /*******************************************************************************
  * PRIVATE FUNCTION PROTOTYPES                                                 *
@@ -67,6 +58,7 @@ static ES_Event storedEvent;
  * PUBLIC FUNCTIONS                                                            *
  ******************************************************************************/
 
+// checks if tape pins have changed
 uint8_t TapeCheck(void) {
     // initialization
     ES_Event thisEvent;
@@ -76,12 +68,12 @@ uint8_t TapeCheck(void) {
     uint16_t tapeReadings = 0x0000 ;        // read sensor data into this
    
     // read ports
-    if(PORTY06_BIT) tapeReadings |= 0x0001 ; // 0000 0000 0000 0001, sensor 1
-    if(PORTY07_BIT) tapeReadings |= 0x0002 ; // 0000 0000 0000 0010, sensor 2
-    if(PORTY08_BIT) tapeReadings |= 0x0004 ; // 0000 0000 0000 0100, sensor 3
-    if(PORTY09_BIT) tapeReadings |= 0x0008 ; // 0000 0000 0000 1000, sensor 4
-    if(PORTY10_BIT) tapeReadings |= 0x0010 ; // 0000 0000 0001 0000, sensor 5
-    if(PORTY11_BIT) tapeReadings |= 0x0020 ; // 0000 0000 0010 0000, sensor 6
+    if(PORTY06_BIT) tapeReadings |= 0b000001 ; // 0000 0000 0000 0001, sensor 1
+    if(PORTY07_BIT) tapeReadings |= 0b000010 ; // 0000 0000 0000 0010, sensor 2
+    if(PORTY08_BIT) tapeReadings |= 0x000100 ; // 0000 0000 0000 0100, sensor 3
+    if(PORTY09_BIT) tapeReadings |= 0x001000 ; // 0000 0000 0000 1000, sensor 4
+    if(PORTY10_BIT) tapeReadings |= 0x010000 ; // 0000 0000 0001 0000, sensor 5
+    if(PORTY11_BIT) tapeReadings |= 0x100000 ; // 0000 0000 0010 0000, sensor 6
 
     // check if changed
     if (lastTapeRead != tapeReadings) { // check for change from last time
@@ -89,15 +81,12 @@ uint8_t TapeCheck(void) {
         thisEvent.EventParam = tapeReadings;
         returnVal = TRUE;
         lastTapeRead = tapeReadings ; // update history
-#ifndef EVENTCHECKER_TEST           // keep this as is for test harness
-        PostNeckbeardService(thisEvent) ;
-#else
-        SaveEvent(thisEvent) ;
-#endif   
+        PostNeckbeardService(thisEvent) ; 
     }
     return (returnVal) ;
 }
 
+// checks if the bumpers have been triggered. has debouncing using ES free running timer
 uint8_t BumperCheck(void) {
     // initialization
     ES_Event thisEvent;
@@ -108,6 +97,7 @@ uint8_t BumperCheck(void) {
     unsigned int currentTime = ES_Timer_GetTime() ; // timer for debouncing
     static unsigned int prevTime = 0 ;
 
+    // bumpers are active lo
     if(!PORTZ09_BIT) bumperReadings |= 0b0001 ; // left front
     if(!PORTZ03_BIT) bumperReadings |= 0b0010 ; // right front
     if(!PORTZ11_BIT) bumperReadings |= 0b0100 ; // left back
@@ -128,20 +118,21 @@ uint8_t BumperCheck(void) {
     return (returnVal) ;
 }
 
+// checks if the track wire pin is above a threshold (ie track is within a proximity)
 uint8_t TrackCheck(void) {
     // initialization
     ES_Event thisEvent;
     uint8_t returnVal = FALSE;
-    static uint8_t state = TRACKLO ;
+    static uint8_t state = TRACKLO ;            // used to implement hysteresis
     
     unsigned int data = AD_ReadADPin(AD_PORTW3) ;
-    if(state == TRACKLO && data > THI) {
-        state = TRACKHI ;
+    if(state == TRACKLO && data > THI) {        // hi threshold 
+        state = TRACKHI ;                       
         thisEvent.EventType = TRACK_SENSED ;
         thisEvent.EventParam = data ; 
         returnVal = TRUE ;
         PostNeckbeardService(thisEvent) ;
-    } else if(state == TRACKHI && data < TLO) {
+    } else if(state == TRACKHI && data < TLO) { // lo threshold 
         state = TRACKLO ;
         thisEvent.EventType = TRACK_LOST ;
         thisEvent.EventParam = data ;
@@ -151,33 +142,35 @@ uint8_t TrackCheck(void) {
     return (returnVal) ;
 }
 
+// returns 4 different events based on the beacon pin reading
 uint8_t BeaconCheck(void) {
     ES_Event thisEvent;
     uint8_t returnVal = FALSE;
-    static uint8_t state = BCNLO ;
+    static uint8_t state = BCNLO ;      // used to implement 3 stage hysteresis
     
     unsigned int data = AD_ReadADPin(AD_PORTW4) ;
-    if(state == BCNLO && data > BMH) {
-        state = BCNMID ;
-        thisEvent.EventType = BEACON_SENSED ;
-        thisEvent.EventParam = (uint16_t)data ;
-        returnVal = TRUE ;
-        PostNeckbeardService(thisEvent) ;
-    } else if((state == BCNMID || state == BCNHI) && data < BML) {
+
+    if((state == BCNMID || state == BCNHI) && data < BML) {         // case 1
         state = BCNLO ;
         thisEvent.EventType = BEACON_LOST ;
         thisEvent.EventParam = (uint16_t)data ;
         returnVal = TRUE ;
         PostNeckbeardService(thisEvent) ;
-    } else if((state == BCNMID || state == BCNLO)  && data > BHH) {
+    } else if((state == BCNMID || state == BCNLO)  && data > BHH) { // case 2
         state = BCNHI ;
         thisEvent.EventType = BEACON_CLOSE ;
         thisEvent.EventParam = (uint16_t)data ;
         returnVal = TRUE ;
         PostNeckbeardService(thisEvent) ;
-    } else if(state == BCNHI && data < BHL) {
-        state = BCNMID ;
+    } else if(state == BCNLO && data > BMH) {                       // case 3 
+        state = BCNMID ;                                            // needs to happen after case 2
         thisEvent.EventType = BEACON_SENSED ;
+        thisEvent.EventParam = (uint16_t)data ;
+        returnVal = TRUE ;
+        PostNeckbeardService(thisEvent) ;
+    } else if(state == BCNHI && data < BHL) {                       // case 4
+        state = BCNMID ;                                            // needs to happen after case 1
+        thisEvent.EventType = BEACON_SLIGHTLY_FARTHER ;
         thisEvent.EventParam = (uint16_t)data ;
         returnVal = TRUE ;
         PostNeckbeardService(thisEvent) ;

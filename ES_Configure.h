@@ -10,6 +10,7 @@
  When           Who     What/Why
  -------------- ---     --------
  01/15/12 10:03 jec      started coding
+ 11/20/26 14:28 bar      ended coding
  *****************************************************************************/
 
 #ifndef CONFIGURE_H
@@ -51,6 +52,7 @@ typedef enum {
     BEACON_SENSED,
     BEACON_LOST,
     BEACON_CLOSE,
+    BEACON_SLIGHTLY_FARTHER,
 	/* User-defined events end here */
     NUMBEROFEVENTS,
 } ES_EventTyp_t;
@@ -73,6 +75,7 @@ static const char *EventNames[] = {
     "BEACON_SENSED",
     "BEACON_LOST",
     "BEACON_CLOSE",
+    "BEACON_SLIGHTLY_FARTHER"
 	"NUMBEROFEVENTS",
 };
 
@@ -92,8 +95,8 @@ static const char *EventNames[] = {
 // corresponding timer expires. All 16 must be defined. If you are not using
 // a timers, then you can use TIMER_UNUSED
 #define TIMER_UNUSED ((pPostFunc)0)
-#define TIMER0_RESP_FUNC PostNeckbeardService
-#define TIMER1_RESP_FUNC PostNeckbeardService
+#define TIMER0_RESP_FUNC TIMER_UNUSED
+#define TIMER1_RESP_FUNC TIMER_UNUSED
 #define TIMER2_RESP_FUNC TIMER_UNUSED
 #define TIMER3_RESP_FUNC TIMER_UNUSED
 #define TIMER4_RESP_FUNC TIMER_UNUSED
@@ -115,9 +118,6 @@ static const char *EventNames[] = {
 // to different timers if the need arises. Keep these definitons close to the
 // definitions for the response functions to make it easire to check that
 // the timer number matches where the timer event will be routed
-
-#define GENERIC_NAMED_TIMER 0 /*make sure this is enabled above and posting to the correct state machine*/
-
 
 /****************************************************************************/
 // The maximum number of services sets an upper bound on the number of 
@@ -160,11 +160,11 @@ static const char *EventNames[] = {
 // These are the definitions for Service 2
 #if NUM_SERVICES > 2
 // the header file with the public function prototypes
-#define SERV_2_HEADER "BumperFSM.h"
+#define SERV_2_HEADER "TestService.h"
 // the name of the Init function
-#define SERV_2_INIT InitBumperFSM
+#define SERV_2_INIT TestServiceInit
 // the name of the run function
-#define SERV_2_RUN RunBumperFSM
+#define SERV_2_RUN TestServiceRun
 // How big should this services Queue be?
 #define SERV_2_QUEUE_SIZE 3
 #endif

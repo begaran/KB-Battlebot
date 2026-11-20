@@ -20,32 +20,39 @@
  * PUBLIC #DEFINES                                                             *
  ******************************************************************************/
 
-/*
-#define TAPESENSOR1 PORTY06_BIT
-#define TAPESENSOR2 PORTY07_BIT
-#define TAPESENSOR3 PORTY08_BIT
-#define TAPESENSOR4 PORTY09_BIT
-#define TAPESENSOR5 PORTY10_BIT
-#define TAPESENSOR6 PORTY11_BIT
-*/
-
 /*******************************************************************************
  * PUBLIC TYPEDEFS                                                             *
  ******************************************************************************/
-
 
 /*******************************************************************************
  * PUBLIC FUNCTION PROTOTYPES                                                  *
  ******************************************************************************/
 
-
-// Returns an 8 bit vector. 
-// Each bit corresponds to a single sensor, with there being 6 sensors total
-// 1 means that sensor is on black tape, 0 means the sensor is off black tape
-// the 2 most significant bits will be 0.
+// Checks if the tape state has changed.
+// Returns the state in EventParam as a uint16_t.
+// Each bit corresponds to a single sensor, with there being 6 sensors total.
+// 1 means that sensor is on black tape, 0 means the sensor is off black tape.
+// The 10 most significant bits will be 0.
+// will post TAPE_SENSED
 uint8_t TapeCheck(void);
 
+// Checks if the bumper state has changed.
+// Returns the state in EventParam as a uint16_t.
+// Each bit corresponds to a single bumper, with there being 4 bumpers total.
+// 1 means that bumper is currently pressed, 0 means the bumper is unpressed.
+// the 12 most significant bits will be 0.
+// will post BUMPER_HIT
 uint8_t BumperCheck(void);
+
+// Checks if trackwire is within range.
+// Returns data (voltage reading) thru EventParam
+// will post TRACK_SENSED or TRACK_LOST
+uint8_t TrackCheck(void);
+
+// Checks if beacon is seen
+// Returns data (voltage reading) thru EventParam
+// will post BEACON_SENSED, BEACON_LOST, BEACON_CLOSE, or BEACON_SLIGHTLY_FARTHER
+uint8_t BeaconCheck(void);
 
 #endif	/* TAPEEVENTCHECKER_H */
 

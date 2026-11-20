@@ -6,6 +6,7 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 #include "Locomotion.h"
+#include "Turret.h"
 #include "pwm.h"
 #include "timers.h"
 #include "RC_Servo.h"
@@ -16,7 +17,9 @@
 // Y
 // 6, 7, 8, 9, 10, 11, 12
 // Z
-// 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+// 3, 4, 5, 6, 7, 8, 9, 11, 12
+
+#define NOMINAL 
 
 
 void main(void)
@@ -50,17 +53,25 @@ void main(void)
     PORTZ07_TRIS = 0 ; // H-bridge IN1
     PORTZ08_TRIS = 0 ; // H-bridge IN2
     PORTX12_TRIS = 0 ; // H-bridge IN3
-    PORTX10_TRIS = 0 ; // H-bridge IN4
+    PORTZ04_TRIS = 0 ; // H-bridge IN4
     
     // more hardware init
     LED_Init() ;
     LED_AddBanks(LED_BANK1 | LED_BANK2 | LED_BANK3) ;
 
-    PWM_AddPins(PWM_PORTZ06) ; // H-bridge ENA
-    PWM_AddPins(PWM_PORTX11) ; // H-bridge ENB
+    PWM_AddPins(PWM_PORTZ06) ;  // H-bridge ENA
+    PWM_AddPins(PWM_PORTX11) ;  // H-bridge ENB
     
     RC_Init() ;
-    RC_AddPins(RC_PORTW07) ;
+    RC_AddPins(RC_PORTW07) ;    // servo test
+    
+    AD_AddPins(AD_PORTW3) ;     // track wire
+    AD_AddPins(AD_PORTW4) ;     // beacon detector
+    
+    //while(1) {
+    //    printf("%u\n", AD_ReadADPin(AD_PORTW3)) ;
+    
+    //}
     
     // for motors, Z6, 7, 8 is similar to X11, 12, 10
     
@@ -85,10 +96,14 @@ void main(void)
     //PWM_SetDutyCycle(PWM_PORTZ06, 600) ; // this goes backwards on the right wheel
     //PORTZ07_BIT = 1;
     //PORTZ08_BIT = 0;
-    // motorBackward(1) ;
-    // setMotorSpeed(1, 50) ;    
+    //setMotorSpeed(LEFT, 700) ;
+    // motorForward(LEFT) ;
+    //setMotorSpeed(1, 50) ;    
+    
     
     // nominal program
+    
+#ifdef NOMINAL 
     ErrorType = ES_Initialize();
     if (ErrorType == Success) {
         ErrorType = ES_Run();
@@ -109,7 +124,7 @@ void main(void)
     
     for (;;)
         ;
-    
+#endif
 };
 
 /*------------------------------- Footnotes -------------------------------*/

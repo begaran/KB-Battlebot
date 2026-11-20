@@ -13,7 +13,7 @@
 #define DIR_LEFT_MOTOR   PORTZ07_BIT // IN1
 #define NDIR_LEFT_MOTOR  PORTZ08_BIT // IN2
 #define DIR_RIGHT_MOTOR  PORTX12_BIT // IN3
-#define NDIR_RIGHT_MOTOR PORTX10_BIT // IN4
+#define NDIR_RIGHT_MOTOR PORTX09_BIT // IN4
 #define RIGHT 1
 #define LEFT 0
 #define FORWARD 2
@@ -43,7 +43,7 @@ void motorInit(void) {
    PORTZ07_LAT = 0 ;
    PORTZ08_LAT = 0 ;
    PORTX12_LAT = 0 ;
-   PORTX10_LAT = 0 ;
+   PORTZ04_LAT = 0 ;
    
    PWM_AddPins(PWM_PORTZ06);
    PWM_AddPins(PWM_PORTX11);
@@ -85,7 +85,7 @@ void revolutionTurn(int direction) {
    return ;
 }
 
-// drives forward with a bias 
+// drives forwards with a bias 
 void driveTurn(int direction) {
     stopMotor() ;
     printf("drive turn %d\n", direction) ;
@@ -96,13 +96,14 @@ void driveTurn(int direction) {
    return ;
 }
 
+// drives backwards with a bias
 void backTurn(int direction) {
     stopMotor() ;
     printf("back turn %d\n", direction) ;
     motorBackward(LEFT) ;
     motorBackward(RIGHT) ;
-    setMotorSpeed(LEFT, direction == RIGHT ? NORM_SPEED - (NORM_SPEED/2) : NORM_SPEED + (NORM_SPEED/4)) ;
-	setMotorSpeed(RIGHT, direction == RIGHT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/2)) ;
+    setMotorSpeed(LEFT, direction == RIGHT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
+	setMotorSpeed(RIGHT, direction == RIGHT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/4)) ;
 }
 
 // changes directions of motors, does not change PWM (speed)
@@ -112,7 +113,7 @@ void motorForward(int lr) {
         PORTZ08_BIT = 1;
 	} else {   
         PORTX12_BIT = 0;
-        PORTX10_BIT = 1;
+        PORTZ04_BIT = 1;
 	}
 	return;
 }
@@ -124,7 +125,7 @@ void motorBackward(int lr) {
         PORTZ08_BIT = 0;
 	} else {
         PORTX12_BIT = 1;
-        PORTX10_BIT = 0;
+        PORTZ04_BIT = 0;
 	}
 	return;
 }

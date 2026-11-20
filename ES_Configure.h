@@ -45,7 +45,12 @@ typedef enum {
     ES_TIMERSTOPPED, /* signals that a timer has stopped*/
     /* User-defined events start here */
     TAPE_SENSED,
-    BUMPER_HIT,     
+    BUMPER_HIT,    
+    TRACK_SENSED,
+    TRACK_LOST,
+    BEACON_SENSED,
+    BEACON_LOST,
+    BEACON_CLOSE,
 	/* User-defined events end here */
     NUMBEROFEVENTS,
 } ES_EventTyp_t;
@@ -63,6 +68,11 @@ static const char *EventNames[] = {
 	"ES_TIMERSTOPPED",
     "TAPE_SENSED",
     "BUMPER_HIT",
+    "TRACK_SENSED",
+    "TRACK_LOST",
+    "BEACON_SENSED",
+    "BEACON_LOST",
+    "BEACON_CLOSE",
 	"NUMBEROFEVENTS",
 };
 
@@ -75,7 +85,7 @@ static const char *EventNames[] = {
 
 /****************************************************************************/
 // This is the list of event checking functions
-#define EVENT_CHECK_LIST TapeCheck, BumperCheck
+#define EVENT_CHECK_LIST TapeCheck, BumperCheck, TrackCheck, BeaconCheck
 
 /****************************************************************************/
 // These are the definitions for the post functions to be executed when the

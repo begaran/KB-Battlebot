@@ -70,10 +70,10 @@ uint8_t TapeCheck(void) {
     // read ports
     if(PORTY06_BIT) tapeReadings |= 0b000001 ; // 0000 0000 0000 0001, sensor 1
     if(PORTY07_BIT) tapeReadings |= 0b000010 ; // 0000 0000 0000 0010, sensor 2
-    if(PORTY08_BIT) tapeReadings |= 0x000100 ; // 0000 0000 0000 0100, sensor 3
-    if(PORTY09_BIT) tapeReadings |= 0x001000 ; // 0000 0000 0000 1000, sensor 4
-    if(PORTY10_BIT) tapeReadings |= 0x010000 ; // 0000 0000 0001 0000, sensor 5
-    if(PORTY11_BIT) tapeReadings |= 0x100000 ; // 0000 0000 0010 0000, sensor 6
+    if(PORTY08_BIT) tapeReadings |= 0b000100 ; // 0000 0000 0000 0100, sensor 3
+    if(PORTY09_BIT) tapeReadings |= 0b001000 ; // 0000 0000 0000 1000, sensor 4
+    if(PORTY10_BIT) tapeReadings |= 0b010000 ; // 0000 0000 0001 0000, sensor 5
+    if(PORTY11_BIT) tapeReadings |= 0b100000 ; // 0000 0000 0010 0000, sensor 6
 
     // check if changed
     if (lastTapeRead != tapeReadings) { // check for change from last time

@@ -10,6 +10,7 @@
 #include "pwm.h"
 #include "timers.h"
 #include "RC_Servo.h"
+#include "Turret.h"
 
 // PORTS THAT WORK: 
 // X
@@ -19,7 +20,7 @@
 // Z
 // 3, 4, 5, 6, 7, 8, 9, 11, 12
 
-#define NOMINAL 
+// #define NOMINAL 
 
 
 void main(void)
@@ -65,9 +66,29 @@ void main(void)
     RC_Init() ;
     RC_AddPins(RC_PORTW07) ;    // servo test
     
+    
     AD_AddPins(AD_PORTW3) ;     // track wire
     AD_AddPins(AD_PORTW4) ;     // beacon detector
     
+    while(1) {
+            seesaw() ; 
+        
+        //RC_SetPulseTime(RC_PORTW07, 500) ;
+        //launch() ;
+    }
+    /*
+    while(1) {
+        for(int i = 1; i < 40; i++) {
+            RC_SetPulseTime(RC_PORTW07, i*50 + 500) ;
+            printf("%d\n", i*50 + 500) ;
+            TIMERS_InitTimer(0x02, 200) ;
+            TIMERS_StartTimer(0x02) ;
+            while(TIMERS_IsTimerExpired(0x02) == TIMER_NOT_ACTIVE) {
+                ;
+            }
+        }
+    }
+     */
     //while(1) {
     //    printf("%u\n", AD_ReadADPin(AD_PORTW3)) ;
     
@@ -75,13 +96,17 @@ void main(void)
     
     // for motors, Z6, 7, 8 is similar to X11, 12, 10
     
-    /* MOTOR TEST CODE - TIMER 
+    /* MOTOR TEST CODE - TIMER  
     while(1) {
         revolutionTurn(RIGHT) ;
-        for(uint32_t i = 0; i < 1 << 16; i++) ;
+        TIMERS_InitTimer(0x02, 1000) ;
+        TIMERS_StartTimer(0x02) ;
+        while(TIMERS_IsTimerExpired(0x02) == TIMER_NOT_ACTIVE) {
+            ;
+        }
         revolutionTurn(LEFT) ;
     }
-    */
+     */    
     
     /* PORT TEST CODE
     while(1) {
@@ -92,7 +117,7 @@ void main(void)
     // MOTOR TEST CODE - DIRECTION
     //PWM_SetDutyCycle(PWM_PORTX11, 600) ; // this goes backwards on the left wheel
     //PORTX12_BIT = 1;
-    //PORTX10_BIT = 0;
+    //PORTZ04_BIT = 0;
     //PWM_SetDutyCycle(PWM_PORTZ06, 600) ; // this goes backwards on the right wheel
     //PORTZ07_BIT = 1;
     //PORTZ08_BIT = 0;

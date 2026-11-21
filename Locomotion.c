@@ -15,7 +15,7 @@
 
 /* DEFINES */
 #define NORM_SPEED 50
-#define STOPTIME 500
+#define STOPTIME 20
 
 // author: jdgrant 
 

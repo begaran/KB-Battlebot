@@ -56,10 +56,17 @@ void forwardTape(uint8_t data) {
 }
 
 void backwardTape(uint8_t data) {
-    if(data & 0x04) {
+    if(data & 0x20) {
         revolutionTurn(LEFT) ;
-    } else {
+        // 0xx xxx
+    } else if((!(data & 0b100111)) || !((data & 0b111) ^ 0b110)) {
         backTurn(RIGHT) ;
+    } else if(!((data & 0b111)^0b001) || !((data & 0b111)^0b010)) {
+        backTurn(RIGHT) ;
+    } else if(!(data ^ 0b111)) {
+        backTurn(LEFT) ;
+    } else {
+        move(BACKWARD) ;
     }
     return ;
 }
@@ -70,7 +77,7 @@ void backwardTape(uint8_t data) {
 uint8_t curTape ;                   // tape as a stored variable
 uint8_t curBump ;                   // bumpers as a stored variable
 static uint8_t MyPriority ;         
-static uint8_t state = s_FORWARD ;  // state variable 1
+static uint8_t state = s_BACKWARD ;  // state variable 1
 uint8_t lastTapes[16] = {0} ;      
 static uint8_t tape_i = 0 ;
 /*******************************************************************************
@@ -104,7 +111,8 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
         break;
         
     case TAPE_SENSED :
-        curTape = (uint8_t)ThisEvent.EventParam ; // Typecast the sensor readings as a filthy byte
+        
+        uint8_t curTape = (uint8_t)ThisEvent.EventParam ; // Typecast the sensor readings as a filthy byte
         LED_SetBank(LED_BANK1, (unsigned char)curTape) ;
         printf("sensors: 0x%x\n", curTape) ;
         
@@ -142,14 +150,19 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
     case TRACK_SENSED :
         printf("Track sensed\n") ;
         if(state == s_FORWARD || state == s_BACKWARD) {
-            state = s_SHOOTER ;
+            // state = s_SHOOTER ;
             // stopMotor(100) ;
-            revolutionTurn(LEFT) ;
+            // revolutionTurn(LEFT) ;
             // set ES timer
         }
         break ; // case TRACK_SENSED
+    /*case BANNER_SENSED :
+        launch() ;
+        state = s_ANNIHILATION
+        break ;*/  
     case TRACK_LOST :
         printf("Track lost\n") ;
+        // if(state == s_SHOOTER)
         break ; // case TRACK_LOST
     case BEACON_SENSED :
         printf("Beacon sensed\n") ;

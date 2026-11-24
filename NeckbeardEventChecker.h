@@ -54,5 +54,11 @@ uint8_t TrackCheck(void);
 // will post BEACON_SENSED, BEACON_LOST, BEACON_CLOSE, or BEACON_SLIGHTLY_FARTHER
 uint8_t BeaconCheck(void);
 
+// Checks if banner is seen
+// Returns data (voltage reading) thru EventParam
+// will post BANNER_DETECTED
+uint8_t BannerCheck(void);
+
+
 #endif	/* TAPEEVENTCHECKER_H */
 

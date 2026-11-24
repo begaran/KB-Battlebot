@@ -53,6 +53,8 @@ typedef enum {
     BEACON_LOST,
     BEACON_CLOSE,
     BEACON_SLIGHTLY_FARTHER,
+    BANNER_DETECTED,
+    BANNER_LOST,
 	/* User-defined events end here */
     NUMBEROFEVENTS,
 } ES_EventTyp_t;
@@ -75,7 +77,9 @@ static const char *EventNames[] = {
     "BEACON_SENSED",
     "BEACON_LOST",
     "BEACON_CLOSE",
-    "BEACON_SLIGHTLY_FARTHER"
+    "BEACON_SLIGHTLY_FARTHER",
+    "BANNER_DETECTED",
+    "BANNER_LOST",
 	"NUMBEROFEVENTS",
 };
 
@@ -88,7 +92,7 @@ static const char *EventNames[] = {
 
 /****************************************************************************/
 // This is the list of event checking functions
-#define EVENT_CHECK_LIST TapeCheck, BumperCheck, TrackCheck, BeaconCheck
+#define EVENT_CHECK_LIST TapeCheck, BumperCheck, TrackCheck, BeaconCheck, BannerCheck
 
 /****************************************************************************/
 // These are the definitions for the post functions to be executed when the

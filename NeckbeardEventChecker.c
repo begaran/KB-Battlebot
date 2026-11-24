@@ -14,6 +14,7 @@
 #include "ES_Events.h"
 #include "serial.h"
 #include "AD.h"
+#include "LED.h"
 #include "IO_Ports.h"
 #include "BOARD.h"
 #include "xc.h"
@@ -33,14 +34,21 @@
 #define BCNLO   0xAB        // beacon very far
 #define BCNMID  0xAC        // beacon within a certain range
 #define BCNHI   0xAD        // beacon close enough to shoot
+#define BNRLO   0x67        //
+#define BNRHI   0x69
 
 // Hysteresis thresholds
-#define TLO 400             // track lo
+#define TLO 550             // track lo
 #define THI 600             // track hi 
 #define BML 400             // beacon mid lo
 #define BMH 600             // beacon mid hi
 #define BHL 700             // beacon hi lo 
 #define BHH 800             // beacon hi hi
+
+#define THRESH_BAN_HI 600   // hi banner threshold
+#define THRESH_BAN_LO 900   // lo banner threshold
+
+#define DIGITAL
 
 /*******************************************************************************
  * EVENTCHECKER_TEST SPECIFIC CODE                                                             *
@@ -126,6 +134,7 @@ uint8_t TrackCheck(void) {
     static uint8_t state = TRACKLO ;            // used to implement hysteresis
     
     unsigned int data = AD_ReadADPin(AD_PORTW3) ;
+    // printf("state: %x, data: %d\n", state, data) ;
     if(state == TRACKLO && data > THI) {        // hi threshold 
         state = TRACKHI ;                       
         thisEvent.EventType = TRACK_SENSED ;
@@ -149,7 +158,6 @@ uint8_t BeaconCheck(void) {
     static uint8_t state = BCNLO ;      // used to implement 3 stage hysteresis
     
     unsigned int data = AD_ReadADPin(AD_PORTW4) ;
-
     if((state == BCNMID || state == BCNHI) && data < BML) {         // case 1
         state = BCNLO ;
         thisEvent.EventType = BEACON_LOST ;
@@ -175,6 +183,49 @@ uint8_t BeaconCheck(void) {
         returnVal = TRUE ;
         PostNeckbeardService(thisEvent) ;
     }
+    
+    return returnVal ;
+}
+
+// checks voltage reading of banner detector for banner color
+uint8_t BannerCheck(void) {
+    ES_Event thisEvent ;
+    uint8_t returnVal = FALSE ;
+    uint8_t state = BNRLO ;
+    
+    // read 
+#ifdef ANALOG 
+    unsigned int data = AD_ReadADPin(AD_PORTW5) ;
+    printf("banner data: %d\n", data) ;
+    // run check
+    if(data < THRESH_BAN_HI && state == BNRLO) {
+        state = BNRHI ;
+        thisEvent.EventType = BANNER_DETECTED ;
+        thisEvent.EventParam = (uint16_t)data ;
+        returnVal = TRUE ;
+        PostNeckbeardService(thisEvent) ;
+    } else if(data > THRESH_BAN_LO && state == BNRHI) {
+        state = BNRLO ;
+        thisEvent.EventType = BANNER_LOST ;
+        thisEvent.EventParam = (uint16_t)data ;
+        returnVal = TRUE ;
+        PostNeckbeardService(thisEvent) ;
+    }
+#endif
+    
+#ifdef DIGITAL
+    if((!PORTZ05_BIT) && state == BNRLO) {
+        state = BNRHI ;
+        thisEvent.EventType = BANNER_DETECTED ;
+        returnVal = TRUE ;
+        PostNeckbeardService(thisEvent) ;
+    } else if(PORTZ05_BIT && state == BNRHI) {
+        state = BNRLO ;
+        thisEvent.EventType = BANNER_LOST ;
+        returnVal = TRUE ;
+        PostNeckbeardService(thisEvent) ;
+    }
+#endif
     
     return returnVal ;
 }

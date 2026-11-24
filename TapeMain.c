@@ -14,18 +14,23 @@
 
 // PORTS THAT WORK: 
 // X
-// 10, 11, 12
+// 11, 12
 // Y
 // 6, 7, 8, 9, 10, 11, 12
 // Z
 // 3, 4, 5, 6, 7, 8, 9, 11, 12
+// V
+// most of them probably
+// W
+// most of them probably
 
-// #define NOMINAL 
-
+// comment out to write own test code 
+//#define NOMINAL 
+//#define TEST1
 
 void main(void)
 {
-    ES_Return_t ErrorType;
+    printf("Initializing KB BATTLEBOT ... \n");
 
     // initialization
     BOARD_Init();
@@ -33,8 +38,6 @@ void main(void)
     PWM_Init();
     AD_Init();
     TIMERS_Init();
-
-    printf("Initializing KB BATTLEBOT ... \nPROTOCOL: Tape Drive, Bumper Extension\n\n");
     
     // set the _TRIS registers to input for each tape sensor. 
     PORTY06_TRIS = 1 ; // Tape sensor 1 output
@@ -53,9 +56,9 @@ void main(void)
     // motor outputs
     PORTZ07_TRIS = 0 ; // H-bridge IN1
     PORTZ08_TRIS = 0 ; // H-bridge IN2
-    PORTX12_TRIS = 0 ; // H-bridge IN3
+    PORTY12_TRIS = 0 ; // H-bridge IN3
     PORTZ04_TRIS = 0 ; // H-bridge IN4
-    
+        
     // more hardware init
     LED_Init() ;
     LED_AddBanks(LED_BANK1 | LED_BANK2 | LED_BANK3) ;
@@ -64,19 +67,19 @@ void main(void)
     PWM_AddPins(PWM_PORTX11) ;  // H-bridge ENB
     
     RC_Init() ;
-    RC_AddPins(RC_PORTW07) ;    // servo test
+    RC_AddPins(RC_PORTW07) ;    // Turret servo
+    RC_AddPins(RC_PORTW08) ;    // Pitch servo
     
-    
-    AD_AddPins(AD_PORTW3) ;     // track wire
-    AD_AddPins(AD_PORTW4) ;     // beacon detector
-    
-    while(1) {
-            seesaw() ; 
+    AD_AddPins(AD_PORTW3) ;     // Track wire
+    AD_AddPins(AD_PORTW4) ;     // Beacon detector
+    AD_AddPins(AD_PORTW5) ;     // IR banner detector
         
-        //RC_SetPulseTime(RC_PORTW07, 500) ;
-        //launch() ;
-    }
-    /*
+    // pitch test code
+    //while(1) {
+    //        launch() ; 
+    //}
+        
+    /* launcher test code
     while(1) {
         for(int i = 1; i < 40; i++) {
             RC_SetPulseTime(RC_PORTW07, i*50 + 500) ;
@@ -89,9 +92,10 @@ void main(void)
         }
     }
      */
+    
+    // AD Read test code
     //while(1) {
     //    printf("%u\n", AD_ReadADPin(AD_PORTW3)) ;
-    
     //}
     
     // for motors, Z6, 7, 8 is similar to X11, 12, 10
@@ -115,8 +119,8 @@ void main(void)
      */
     
     // MOTOR TEST CODE - DIRECTION
-    //PWM_SetDutyCycle(PWM_PORTX11, 600) ; // this goes backwards on the left wheel
-    //PORTX12_BIT = 1;
+    //PWM_SetDutyCycle(PWM_PORTX11, 800) ; // this goes backwards on the left wheel
+    //PORTY12_BIT = 1;
     //PORTZ04_BIT = 0;
     //PWM_SetDutyCycle(PWM_PORTZ06, 600) ; // this goes backwards on the right wheel
     //PORTZ07_BIT = 1;
@@ -124,11 +128,15 @@ void main(void)
     //setMotorSpeed(LEFT, 700) ;
     // motorForward(LEFT) ;
     //setMotorSpeed(1, 50) ;    
+    //setMotorSpeed(LEFT, 700) ;
+    //motorBackward(LEFT) ;
     
     
     // nominal program
     
+
 #ifdef NOMINAL 
+    ES_Return_t ErrorType;
     ErrorType = ES_Initialize();
     if (ErrorType == Success) {
         ErrorType = ES_Run();
@@ -150,7 +158,32 @@ void main(void)
     for (;;)
         ;
 #endif
-};
+    
+    
+// motors
+motorForward(0) ;
+motorForward(1) ;
+setMotorSpeed(0, 600) ;
+setMotorSpeed(1, 600) ;
+wait(4000) ;
 
+motorBackward(0) ;
+motorBackward(1) ;
+
+
+// servos
+while(1) {
+    RC_SetPulseTime(RC_PORTW07, LUNCHLO) ;
+    wait(1000) ;
+    RC_SetPulseTime(RC_PORTW07, LUNCHHI) ;
+    wait(1000) ;
+}
+     
+
+// RC_SetPulseTime(RC_PORTW08, PITCHLO) ;
+//RC_SetPulseTime(RC_PORTW08, PITCHHI) ;
+//wait(500) ;
+ 
+};
 /*------------------------------- Footnotes -------------------------------*/
 /*------------------------------ End of file ------------------------------*/

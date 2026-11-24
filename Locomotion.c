@@ -17,6 +17,8 @@
 #define NORM_SPEED 50
 #define STOPTIME 20
 
+//#define LOCDEBUG
+
 // author: jdgrant 
 
 // stops motor 
@@ -25,11 +27,15 @@ void stopMotor(unsigned int time) {
     setMotorSpeed(RIGHT, 0);
     TIMERS_InitTimer(0x01, time) ;
     TIMERS_StartTimer(0x01) ;
+#ifdef LOCDEBUG
     printf("started timer\n") ;
-    while(TIMERS_IsTimerExpired(0x01) == TIMER_NOT_ACTIVE) {
+#endif
+    while(TIMERS_IsTimerExpired(0x01) == TIMER_NOT_EXPIRED) {
         ;
     }
+#ifdef LOCDEBUG
     printf("timer expired\n") ;
+#endif
     return ;
 }
 
@@ -50,7 +56,9 @@ void motorInit(void) {
 // straight lateral movement
 void move(int direction) {
    stopMotor(STOPTIME) ;
+#ifdef LOCDEBUG
    printf("moving %d\n", direction) ;
+#endif
    if(direction == FORWARD) {
     motorForward(LEFT);
     motorForward(RIGHT);
@@ -67,7 +75,9 @@ void move(int direction) {
 // tank turn, simple revolution
 void revolutionTurn(int direction) {
    stopMotor(STOPTIME) ;
+#ifdef LOCDEBUG
    printf("tank turn %d\n", direction) ;
+#endif
    if(direction == LEFT) {
     motorForward(RIGHT);
     motorBackward(LEFT);
@@ -83,7 +93,9 @@ void revolutionTurn(int direction) {
 // drives forwards with a bias 
 void driveTurn(int direction) {
     stopMotor(STOPTIME) ;
+#ifdef LOCDEBUG
     printf("drive turn %d\n", direction) ;
+#endif
     motorForward(LEFT) ;
     motorForward(RIGHT) ;
 	setMotorSpeed(LEFT, direction == LEFT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
@@ -94,7 +106,9 @@ void driveTurn(int direction) {
 // drives backwards with a bias
 void backTurn(int direction) {
     stopMotor(STOPTIME) ;
+#ifdef LOCDEBUG
     printf("back turn %d\n", direction) ;
+#endif
     motorBackward(LEFT) ;
     motorBackward(RIGHT) ;
     setMotorSpeed(LEFT, direction == RIGHT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
@@ -107,7 +121,7 @@ void motorForward(int lr) {
 		PORTZ07_BIT = 0; 
         PORTZ08_BIT = 1;
 	} else {   
-        PORTX12_BIT = 0;
+        PORTY12_BIT = 0;
         PORTZ04_BIT = 1;
 	}
 	return;
@@ -119,7 +133,7 @@ void motorBackward(int lr) {
 		PORTZ07_BIT = 1;
         PORTZ08_BIT = 0;
 	} else {
-        PORTX12_BIT = 1;
+        PORTY12_BIT = 1;
         PORTZ04_BIT = 0;
 	}
 	return;

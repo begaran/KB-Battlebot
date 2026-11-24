@@ -7,7 +7,7 @@
 #include "Turret.h"
 #include "RC_Servo.h"
 
-#define PITCHLO 2100 
+#define PITCHLO 2140 
 #define PITCHHI 2350
 
 #define LUNCHLO 500
@@ -24,16 +24,16 @@ void wait(unsigned int time) {
 
 void launch(void) {
     RC_SetPulseTime(RC_PORTW07, LUNCHLO) ;
-    wait(500) ;
+    wait(1000) ;
     RC_SetPulseTime(RC_PORTW07, LUNCHHI) ;
-    wait(500) ;
+    wait(1000) ;
     return ;
 }
 
 void seesaw(void) {
-    RC_SetPulseTime(RC_PORTW07, PITCHLO) ;
+    RC_SetPulseTime(RC_PORTW08, PITCHLO) ;
     wait(500) ;
-    RC_SetPulseTime(RC_PORTW07, PITCHHI) ;
+    RC_SetPulseTime(RC_PORTW08, PITCHHI) ;
     wait(500) ;
     return ;
 }

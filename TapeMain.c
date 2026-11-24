@@ -26,11 +26,10 @@
 
 // comment out to write own test code 
 //#define NOMINAL 
-//#define TEST1
+//#define TIME1
 
-void main(void)
-{
-    printf("Initializing KB BATTLEBOT ... \n");
+void main(void) {
+    printf("KB BATTLEBOT Initiating...\n");
 
     // initialization
     BOARD_Init();
@@ -69,11 +68,29 @@ void main(void)
     RC_Init() ;
     RC_AddPins(RC_PORTW07) ;    // Turret servo
     RC_AddPins(RC_PORTW08) ;    // Pitch servo
+    RC_AddPins(RC_PORTV04) ;    // reloader servo
     
     AD_AddPins(AD_PORTW3) ;     // Track wire
     AD_AddPins(AD_PORTW4) ;     // Beacon detector
     AD_AddPins(AD_PORTW5) ;     // IR banner detector
-        
+
+    int i = 1000 ;
+    while(1) {
+        while(1) {
+
+            RC_SetPulseTime(RC_PORTV04, i) ;
+            i += 20 ;
+            if(i >= 2000) break ;
+            wait(50) ;
+        }
+        while(1) {
+
+            RC_SetPulseTime(RC_PORTV04, i) ;
+            i -= 20 ;
+            if(i <= 1000) break ;
+            wait(50) ;
+        }
+    }
     // pitch test code
     //while(1) {
     //        launch() ; 
@@ -159,30 +176,28 @@ void main(void)
         ;
 #endif
     
-    
-// motors
-motorForward(0) ;
-motorForward(1) ;
-setMotorSpeed(0, 600) ;
-setMotorSpeed(1, 600) ;
-wait(4000) ;
+#ifdef TEST1
+    while(1) {
+        // motors
+        setMotorSpeed(0, 600) ;
+        setMotorSpeed(1, 600) ;
+        motorForward(0) ;
+        motorForward(1) ;
 
-motorBackward(0) ;
-motorBackward(1) ;
+        wait(4000) ;
 
+        motorBackward(0) ;
+        motorBackward(1) ;
+        wait(3000) ;
 
-// servos
-while(1) {
-    RC_SetPulseTime(RC_PORTW07, LUNCHLO) ;
-    wait(1000) ;
-    RC_SetPulseTime(RC_PORTW07, LUNCHHI) ;
-    wait(1000) ;
-}
-     
-
-// RC_SetPulseTime(RC_PORTW08, PITCHLO) ;
-//RC_SetPulseTime(RC_PORTW08, PITCHHI) ;
-//wait(500) ;
+        // servos
+        setLMin() ;
+        setPMin() ;
+        wait(1000) ;
+        setLMax() ;
+        setPMax() ;
+    }
+#endif
  
 };
 /*------------------------------- Footnotes -------------------------------*/

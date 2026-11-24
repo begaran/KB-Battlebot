@@ -27,6 +27,7 @@
  ******************************************************************************/
 
 #define WAITTIME 500        // for timer debouncing on bumpers
+#define TAPETIME 500        // for timer debouncing on tape sensors
 
 //states
 #define TRACKLO 0x00        // track wire not sensed
@@ -72,6 +73,9 @@ uint8_t TapeCheck(void) {
     ES_Event thisEvent;
     uint8_t returnVal = FALSE;
     
+    unsigned int currentTime = ES_Timer_GetTime() ; // timer for debouncing
+    static unsigned int prevTime = 0 ;
+    
     static uint16_t lastTapeRead = 0x0000 ; // need to store last tapes read
     uint16_t tapeReadings = 0x0000 ;        // read sensor data into this
    
@@ -80,16 +84,21 @@ uint8_t TapeCheck(void) {
     if(PORTY07_BIT) tapeReadings |= 0b000010 ; // 0000 0000 0000 0010, sensor 2
     if(PORTY08_BIT) tapeReadings |= 0b000100 ; // 0000 0000 0000 0100, sensor 3
     if(PORTY09_BIT) tapeReadings |= 0b001000 ; // 0000 0000 0000 1000, sensor 4
-    if(PORTY10_BIT) tapeReadings |= 0b010000 ; // 0000 0000 0001 0000, sensor 5
+    //if(PORTY10_BIT) tapeReadings |= 0b010000 ; // 0000 0000 0001 0000, sensor 5
     if(PORTY11_BIT) tapeReadings |= 0b100000 ; // 0000 0000 0010 0000, sensor 6
 
     // check if changed
     if (lastTapeRead != tapeReadings) { // check for change from last time
-        thisEvent.EventType = TAPE_SENSED ;
-        thisEvent.EventParam = tapeReadings;
-        returnVal = TRUE;
-        lastTapeRead = tapeReadings ; // update history
-        PostNeckbeardService(thisEvent) ; 
+        if( (currentTime > prevTime && currentTime - prevTime > TAPETIME) || 
+            (currentTime < prevTime && currentTime + (UINT_MAX-prevTime) > TAPETIME) 
+          ) {
+            thisEvent.EventType = TAPE_SENSED ;
+            thisEvent.EventParam = tapeReadings;
+            returnVal = TRUE;
+            lastTapeRead = tapeReadings ; // update history
+            prevTime = currentTime ;
+            PostNeckbeardService(thisEvent) ; 
+        }
     }
     return (returnVal) ;
 }
@@ -191,7 +200,7 @@ uint8_t BeaconCheck(void) {
 uint8_t BannerCheck(void) {
     ES_Event thisEvent ;
     uint8_t returnVal = FALSE ;
-    uint8_t state = BNRLO ;
+    static uint8_t state = BNRLO ;
     
     // read 
 #ifdef ANALOG 
@@ -214,6 +223,7 @@ uint8_t BannerCheck(void) {
 #endif
     
 #ifdef DIGITAL
+    // edge detected, not debounced
     if((!PORTZ05_BIT) && state == BNRLO) {
         state = BNRHI ;
         thisEvent.EventType = BANNER_DETECTED ;

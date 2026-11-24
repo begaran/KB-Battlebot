@@ -7,11 +7,7 @@
 #include "Turret.h"
 #include "RC_Servo.h"
 
-#define PITCHLO 2140 
-#define PITCHHI 2350
-
-#define LUNCHLO 500
-#define LUNCHHI 2600
+// HI and LO pulses defined int "Turret.h"
 
 void wait(unsigned int time) {
     TIMERS_InitTimer(0x02, time) ;
@@ -23,18 +19,51 @@ void wait(unsigned int time) {
 }
 
 void launch(void) {
-    RC_SetPulseTime(RC_PORTW07, LUNCHLO) ;
+    setLMin() ;
     wait(1000) ;
-    RC_SetPulseTime(RC_PORTW07, LUNCHHI) ;
+    setLMax() ;
     wait(1000) ;
     return ;
 }
 
 void seesaw(void) {
-    RC_SetPulseTime(RC_PORTW08, PITCHLO) ;
+    setPMin() ;
     wait(500) ;
-    RC_SetPulseTime(RC_PORTW08, PITCHHI) ;
+    setPMax() ;
     wait(500) ;
     return ;
 }
 
+void setLaunch(unsigned short int pulse) {
+    if(pulse > LUNCHHI) pulse = LUNCHHI ;
+    if(pulse < LUNCHLO) pulse = LUNCHLO ;
+    RC_SetPulseTime(RC_PORTW07, pulse) ;
+    return ;
+}
+
+void setPitch(unsigned short int pulse) {
+    if(pulse > PITCHHI) pulse = PITCHHI ;
+    if(pulse < PITCHLO) pulse = PITCHLO ;
+    RC_SetPulseTime(RC_PORTW08, pulse) ;
+    return ;
+}
+
+void setLMax(void) {
+    setLaunch(LUNCHHI) ;
+    return ;
+}
+
+void setLMin(void) {
+    setLaunch(LUNCHLO) ;
+    return ;
+}
+
+void setPMax(void) {
+    setPitch(PITCHHI) ;
+    return ;
+}
+
+void setPMin(void) {
+    setPitch(PITCHLO) ;
+    return ;
+}

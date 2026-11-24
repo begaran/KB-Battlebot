@@ -43,7 +43,9 @@ extern "C" {
     
     void setMotorSpeed(int lr, int speed) ;
 
-
+    void crank90(int lr) ;
+    
+    void rampSpeed(int lr, int speed) ;
 #ifdef	__cplusplus
 }
 #endif

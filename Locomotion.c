@@ -16,6 +16,14 @@
 /* DEFINES */
 #define NORM_SPEED 50
 #define STOPTIME 20
+#define TIME90 1000
+#define SPEEDINCREMENT 1
+
+int leftdir ;
+int rightdir ;
+
+int leftSpeed ;
+int rightSpeed ;
 
 //#define LOCDEBUG
 
@@ -41,78 +49,100 @@ void stopMotor(unsigned int time) {
 
 // initiates pins used and a timer
 void motorInit(void) {
-   PORTZ07_LAT = 0 ;
-   PORTZ08_LAT = 0 ;
-   PORTX12_LAT = 0 ;
-   PORTZ04_LAT = 0 ;
-   
-   PWM_AddPins(PWM_PORTZ06);
-   PWM_AddPins(PWM_PORTX11);
-   TIMERS_InitTimer(0x01, STOPTIME);
-   
-   return ;
+    PORTZ07_LAT = 0 ;
+    PORTZ08_LAT = 0 ;
+    PORTX12_LAT = 0 ;
+    PORTZ04_LAT = 0 ;
+
+    PWM_AddPins(PWM_PORTZ06);
+    PWM_AddPins(PWM_PORTX11);
+    TIMERS_InitTimer(0x01, STOPTIME);
+
+    return ;
 }
 
 // straight lateral movement
 void move(int direction) {
-   stopMotor(STOPTIME) ;
 #ifdef LOCDEBUG
-   printf("moving %d\n", direction) ;
+    printf("moving %d\n", direction) ;
 #endif
-   if(direction == FORWARD) {
-    motorForward(LEFT);
-    motorForward(RIGHT);
-   } else {
-    motorBackward(RIGHT);
-	motorBackward(LEFT); 
-   }
-   setMotorSpeed(LEFT, NORM_SPEED);
-   setMotorSpeed(RIGHT, NORM_SPEED);
+    if(direction == FORWARD) {
+        //if(leftdir == BACKWARD || rightdir == BACKWARD) stopMotor(STOPTIME) ;
+        if(leftdir == BACKWARD) rampSpeed(LEFT, 0) ;
+        if(rightdir == BACKWARD) rampSpeed(RIGHT, 0) ;
+        motorForward(LEFT);
+        motorForward(RIGHT);
+    } else {
+        //if(leftdir == FORWARD || rightdir == FORWARD) stopMotor(STOPTIME) ;
+        if(leftdir == FORWARD) rampSpeed(LEFT, 0) ;
+        if(rightdir == FORWARD) rampSpeed(RIGHT, 0) ;
+        motorBackward(RIGHT);
+        motorBackward(LEFT); 
+    }
+    rampSpeed(LEFT, NORM_SPEED) ;
+    rampSpeed(RIGHT, NORM_SPEED) ;
+    //setMotorSpeed(LEFT, NORM_SPEED);
+    //setMotorSpeed(RIGHT, NORM_SPEED);
 
-   return ;
+    return ;
 }
 
 // tank turn, simple revolution
 void revolutionTurn(int direction) {
-   stopMotor(STOPTIME) ;
 #ifdef LOCDEBUG
-   printf("tank turn %d\n", direction) ;
+    printf("tank turn %d\n", direction) ;
 #endif
-   if(direction == LEFT) {
-    motorForward(RIGHT);
-    motorBackward(LEFT);
-   } else {
-    motorForward(LEFT);
-	motorBackward(RIGHT);
-   }
-   setMotorSpeed(LEFT, NORM_SPEED);
-   setMotorSpeed(RIGHT, NORM_SPEED);
-   return ;
+    if(direction == LEFT) {
+        //if(leftdir == BACKWARD || rightdir == FORWARD) stopMotor(STOPTIME) ;
+        if(leftdir == FORWARD) rampSpeed(LEFT, 0) ;
+        if(rightdir == BACKWARD) rampSpeed(RIGHT, 0) ;
+        motorForward(RIGHT);
+        motorBackward(LEFT);
+    } else {
+        //if(leftdir == BACKWARD || rightdir == FORWARD) stopMotor(STOPTIME) ;
+        if(leftdir == BACKWARD) rampSpeed(LEFT, 0) ;
+        if(rightdir == FORWARD) rampSpeed(RIGHT, 0) ;
+        motorForward(LEFT);
+        motorBackward(RIGHT);
+    }
+    rampSpeed(LEFT, NORM_SPEED) ;
+    rampSpeed(RIGHT, NORM_SPEED) ;
+    //setMotorSpeed(LEFT, NORM_SPEED);
+    //setMotorSpeed(RIGHT, NORM_SPEED);
+    return ;
 }
 
 // drives forwards with a bias 
 void driveTurn(int direction) {
-    stopMotor(STOPTIME) ;
 #ifdef LOCDEBUG
     printf("drive turn %d\n", direction) ;
 #endif
+    //if(leftdir == BACKWARD || rightdir == BACKWARD) stopMotor(STOPTIME) ;
+    if(leftdir == BACKWARD) rampSpeed(LEFT, 0) ;
+    if(rightdir == BACKWARD) rampSpeed(RIGHT, 0) ;
     motorForward(LEFT) ;
     motorForward(RIGHT) ;
-	setMotorSpeed(LEFT, direction == LEFT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
-	setMotorSpeed(RIGHT, direction == LEFT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/4)) ;
+    rampSpeed(LEFT, direction == LEFT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
+    rampSpeed(RIGHT, direction == LEFT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/4)) ;
+	//setMotorSpeed(LEFT, direction == LEFT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
+	//setMotorSpeed(RIGHT, direction == LEFT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/4)) ;
    return ;
 }
 
 // drives backwards with a bias
 void backTurn(int direction) {
-    stopMotor(STOPTIME) ;
 #ifdef LOCDEBUG
     printf("back turn %d\n", direction) ;
 #endif
+    //if(leftdir == FORWARD || rightdir == FORWARD) stopMotor(STOPTIME) ;
+    if(leftdir == FORWARD) rampSpeed(LEFT, 0) ;
+    if(rightdir == FORWARD) rampSpeed(RIGHT, 0) ;
     motorBackward(LEFT) ;
     motorBackward(RIGHT) ;
-    setMotorSpeed(LEFT, direction == RIGHT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
-	setMotorSpeed(RIGHT, direction == RIGHT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/4)) ;
+    rampSpeed(LEFT, direction == RIGHT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
+    rampSpeed(RIGHT, direction == RIGHT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/4)) ;
+    //setMotorSpeed(LEFT, direction == RIGHT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
+	//setMotorSpeed(RIGHT, direction == RIGHT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/4)) ;
 }
 
 // changes directions of motors, does not change PWM (speed)
@@ -120,9 +150,11 @@ void motorForward(int lr) {
 	if (lr == RIGHT) {
 		PORTZ07_BIT = 0; 
         PORTZ08_BIT = 1;
+        rightdir = FORWARD ;
 	} else {   
         PORTY12_BIT = 0;
         PORTZ04_BIT = 1;
+        leftdir = FORWARD ;
 	}
 	return;
 }
@@ -132,9 +164,11 @@ void motorBackward(int lr) {
 	if (lr == RIGHT) {
 		PORTZ07_BIT = 1;
         PORTZ08_BIT = 0;
+        rightdir = BACKWARD ;
 	} else {
         PORTY12_BIT = 1;
         PORTZ04_BIT = 0;
+        leftdir = BACKWARD ;
 	}
 	return;
 }
@@ -142,6 +176,8 @@ void motorBackward(int lr) {
 // sets the PWM duty cycles (speed). Does not touch the directions of the motors
 void setMotorSpeed(int lr, int speed) {
     // ripped from github
+    if(lr == RIGHT) rightSpeed = speed ;
+    if(lr == LEFT) leftSpeed = speed ;
     uint16_t batVoltage = (AD_ReadADPin(BAT_VOLTAGE) * 33) / 1023 ; 
 	if(speed > 50) {
         speed = 50 ;
@@ -158,4 +194,42 @@ void setMotorSpeed(int lr, int speed) {
 		PWM_SetDutyCycle(PWM_PORTX11, speed) ;
 	}
 	return ;
+}
+
+void rampSpeed(int lr, int speed) {
+    if(lr == RIGHT) {
+        while(1) {
+            if(rightSpeed < speed) {
+                setMotorSpeed(lr, rightSpeed + SPEEDINCREMENT) ;
+            } else if(rightSpeed > speed) {
+                setMotorSpeed(lr, rightSpeed - SPEEDINCREMENT) ;
+            } else {
+                break ;
+            }
+        }
+    } else {
+        while(1) {
+            if(leftSpeed < speed) {
+                setMotorSpeed(lr, leftSpeed + SPEEDINCREMENT) ;
+            } else if(leftSpeed > speed) {
+                setMotorSpeed(lr, leftSpeed - SPEEDINCREMENT) ;
+            } else {
+                break ;
+            }
+        }
+    }
+    return ;
+}
+
+
+void crank90(int lr) {
+    stopMotor(100) ;
+    revolutionTurn(lr) ;
+    TIMERS_InitTimer(0x04, TIME90) ;
+    TIMERS_StartTimer(0x04) ;
+    while(TIMERS_IsTimerExpired(0x01) == TIMER_NOT_EXPIRED) {
+        ;
+    }
+    stopMotor(100) ;
+    return ;
 }

@@ -28,6 +28,8 @@ void setLMin(void) ;
 void setPMax(void) ;
     
 void setPMin(void) ;
+
+void reload(void) ;
     
 #ifdef	__cplusplus
 }

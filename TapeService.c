@@ -67,7 +67,8 @@ void backwardTape(uint8_t data) {
     } else if(!((data & 0b111)^0b001) || !((data & 0b111)^0b010)) {
         backTurn(RIGHT) ;
     } else if(!(data ^ 0b111)) {
-        backTurn(LEFT) ;
+        //backTurn(LEFT) ;
+        move(BACKWARD) ;
     } else {
         move(BACKWARD) ;
     }
@@ -83,7 +84,7 @@ static uint8_t state = s_BACKWARD ; // state variable 1
 uint8_t lastDir ;                   // stores the direction of the bot when at tower
 uint8_t lastTapes[16] = {0} ;      
 static uint8_t tape_i = 0 ;
-static uint32_t ttiempo = TURNTIME * 2 ;
+static uint32_t ttiempo = TURNTIME ;
 static int towerShots = 6 ;
 /*******************************************************************************
  * PUBLIC FUNCTIONS                                                            *
@@ -96,6 +97,7 @@ uint8_t InitTapeService(uint8_t Priority) {
     ES_Timer_Init() ;
     TIMERS_InitTimer(0x03, 1000) ;  // for track wire. let this stop naturally
     TIMERS_StartTimer(0x03) ;
+    setPitch(PITCHHI) ;
 
     ThisEvent.EventType = ES_INIT;
     if (ES_PostToService(MyPriority, ThisEvent) == TRUE) {
@@ -169,7 +171,7 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
         if((state == s_FORWARD || state == s_BACKWARD) && TIMERS_IsTimerExpired(0x03) != TIMER_NOT_EXPIRED) {
             printf("Entering shooter stage\n") ;
             lastDir = state ;
-            ES_Timer_SetTimer(TURNTIMER, TURNTIME) ;
+            ES_Timer_SetTimer(TURNTIMER, ttiempo) ;
             ES_Timer_StartTimer(TURNTIMER) ;
         }
         break ; // case TRACK_SENSED
@@ -178,12 +180,17 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
         LED_SetBank(LED_BANK3, 0x33) ;
         stopMotor(100) ;                // stop motors
         ES_Timer_StopTimer(TURNTIMER) ; // stop timer
+        
         launch() ;
         towerShots-- ;
-        // reload and adjust here
-        setPitch(PITCHHI - 50) ;    // placeholder adjustment
+        reload() ;
+        //setPitch(PITCHHI - 50) ;    // placeholder adjustment
+        
         launch() ;
         towerShots-- ;
+        reload() ;
+        //setPitch(PITCHHI) ;
+        
         if(towerShots > 0) {
             if(lastDir == s_FORWARD) {
                 forwardTape(curTape) ;
@@ -192,9 +199,11 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
             }
             TIMERS_InitTimer(0x03, 2000) ;
             TIMERS_StartTimer(0x03) ;
-            ttiempo = TURNTIME * 2 ;
+            ttiempo = TURNTIME ;
         } else {
             state = s_ANNIHILATION_PROTOCOL ;
+            revolutionTurn(RIGHT) ;
+            // may possibly need to put on timer and then move around on timeouts
         }
         break ; // case BANNER_DETECTED 
     case TRACK_LOST :
@@ -209,20 +218,28 @@ ES_Event RunTapeService(ES_Event ThisEvent) {
     /*s_ANNIHILATION_PROTOCOL. DESTROY THE ENEMY, CHILD*/
     case BEACON_SENSED :
         printf("Beacon sensed\n") ;
-        move(FORWARD) ;
+        if(state == s_ANNIHILATION_PROTOCOL) {
+            move(FORWARD) ;
+        }
         break ; // case BEACON_SENSED
     case BEACON_LOST :
         printf("Beacon lost\n") ;
-        revolutionTurn(RIGHT) ; // stupid beacon search
+        if(state == s_ANNIHILATION_PROTOCOL) {
+            revolutionTurn(RIGHT) ; // stupid beacon search
+        }
         break ; // case BEACON_LOST
-    case BEACON_CLOSE :        
-        crank90(RIGHT) ;
-        wait(1000) ;
-        launch() ;
+    case BEACON_CLOSE :    
         printf("Beacon close\n") ;
+        if(state == s_ANNIHILATION_PROTOCOL) {
+            crank90(RIGHT) ;
+            wait(1000) ;
+            launch() ;
+        }
         break ; // case BEACON_CLOSE
     case BEACON_SLIGHTLY_FARTHER :
-        revolutionTurn(RIGHT) ;
+        if(state == s_ANNIHILATION_PROTOCOL) {
+            revolutionTurn(RIGHT) ;
+        }
         break ; // case BEACON_SLIGHTLY_FARTHER
     }
 

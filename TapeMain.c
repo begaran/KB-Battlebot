@@ -25,8 +25,8 @@
 // most of them probably
 
 // comment out to write own test code 
-//#define NOMINAL 
-//#define TIME1
+#define NOMINAL 
+//#define TEST1
 
 void main(void) {
     printf("KB BATTLEBOT Initiating...\n");
@@ -74,6 +74,7 @@ void main(void) {
     AD_AddPins(AD_PORTW4) ;     // Beacon detector
     AD_AddPins(AD_PORTW5) ;     // IR banner detector
 
+    /*
     int i = 1000 ;
     while(1) {
         while(1) {
@@ -91,6 +92,8 @@ void main(void) {
             wait(50) ;
         }
     }
+     */
+    
     // pitch test code
     //while(1) {
     //        launch() ; 
@@ -179,23 +182,24 @@ void main(void) {
 #ifdef TEST1
     while(1) {
         // motors
-        setMotorSpeed(0, 600) ;
-        setMotorSpeed(1, 600) ;
-        motorForward(0) ;
-        motorForward(1) ;
-
-        wait(4000) ;
-
-        motorBackward(0) ;
-        motorBackward(1) ;
+        move(FORWARD) ;
         wait(3000) ;
 
+        move(BACKWARD) ;
+        wait(3000) ;
+
+        stopMotor(10) ;
+        
         // servos
         setLMin() ;
-        setPMin() ;
         wait(1000) ;
         setLMax() ;
+        wait(1000) ;
+        setPMin() ;
+        wait(1000) ;
         setPMax() ;
+        wait(1000) ;
+        reload() ;
     }
 #endif
  

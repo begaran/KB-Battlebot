@@ -10,14 +10,15 @@
 #include "pwm.h"
 #include "AD.h"
 #include "Locomotion.h"
+#include "Turret.h"
 #include <stdio.h>
 #include "timers.h"
 
 /* DEFINES */
-#define NORM_SPEED 50
+#define NORM_SPEED 60
 #define STOPTIME 20
 #define TIME90 1000
-#define SPEEDINCREMENT 1
+#define SPEEDINCREMENT 10
 
 int leftdir ;
 int rightdir ;
@@ -25,7 +26,7 @@ int rightdir ;
 int leftSpeed ;
 int rightSpeed ;
 
-//#define LOCDEBUG
+#define LOCDEBUG
 
 // author: jdgrant 
 
@@ -67,22 +68,22 @@ void move(int direction) {
     printf("moving %d\n", direction) ;
 #endif
     if(direction == FORWARD) {
-        //if(leftdir == BACKWARD || rightdir == BACKWARD) stopMotor(STOPTIME) ;
-        if(leftdir == BACKWARD) rampSpeed(LEFT, 0) ;
-        if(rightdir == BACKWARD) rampSpeed(RIGHT, 0) ;
+        if(leftdir == BACKWARD || rightdir == BACKWARD) stopMotor(STOPTIME) ;
+        //if(leftdir == BACKWARD) rampSpeed(LEFT, 1) ;
+        //if(rightdir == BACKWARD) rampSpeed(RIGHT, 1) ;
         motorForward(LEFT);
         motorForward(RIGHT);
     } else {
-        //if(leftdir == FORWARD || rightdir == FORWARD) stopMotor(STOPTIME) ;
-        if(leftdir == FORWARD) rampSpeed(LEFT, 0) ;
-        if(rightdir == FORWARD) rampSpeed(RIGHT, 0) ;
+        if(leftdir == FORWARD || rightdir == FORWARD) stopMotor(STOPTIME) ;
+        //if(leftdir == FORWARD) rampSpeed(LEFT, 1) ;
+        //if(rightdir == FORWARD) rampSpeed(RIGHT, 1) ;
         motorBackward(RIGHT);
         motorBackward(LEFT); 
     }
-    rampSpeed(LEFT, NORM_SPEED) ;
-    rampSpeed(RIGHT, NORM_SPEED) ;
-    //setMotorSpeed(LEFT, NORM_SPEED);
-    //setMotorSpeed(RIGHT, NORM_SPEED);
+    //rampSpeed(LEFT, NORM_SPEED) ;
+    //rampSpeed(RIGHT, NORM_SPEED) ;
+    setMotorSpeed(LEFT, NORM_SPEED);
+    setMotorSpeed(RIGHT, NORM_SPEED);
 
     return ;
 }
@@ -93,22 +94,22 @@ void revolutionTurn(int direction) {
     printf("tank turn %d\n", direction) ;
 #endif
     if(direction == LEFT) {
-        //if(leftdir == BACKWARD || rightdir == FORWARD) stopMotor(STOPTIME) ;
-        if(leftdir == FORWARD) rampSpeed(LEFT, 0) ;
-        if(rightdir == BACKWARD) rampSpeed(RIGHT, 0) ;
+        if(leftdir == BACKWARD || rightdir == FORWARD) stopMotor(STOPTIME) ;
+        //if(leftdir == FORWARD) rampSpeed(LEFT, 1) ;
+        //if(rightdir == BACKWARD) rampSpeed(RIGHT, 1) ;
         motorForward(RIGHT);
         motorBackward(LEFT);
     } else {
-        //if(leftdir == BACKWARD || rightdir == FORWARD) stopMotor(STOPTIME) ;
-        if(leftdir == BACKWARD) rampSpeed(LEFT, 0) ;
-        if(rightdir == FORWARD) rampSpeed(RIGHT, 0) ;
+        if(leftdir == BACKWARD || rightdir == FORWARD) stopMotor(STOPTIME) ;
+        //if(leftdir == BACKWARD) rampSpeed(LEFT, 1) ;
+        //if(rightdir == FORWARD) rampSpeed(RIGHT, 1) ;
         motorForward(LEFT);
         motorBackward(RIGHT);
     }
-    rampSpeed(LEFT, NORM_SPEED) ;
-    rampSpeed(RIGHT, NORM_SPEED) ;
-    //setMotorSpeed(LEFT, NORM_SPEED);
-    //setMotorSpeed(RIGHT, NORM_SPEED);
+    //rampSpeed(LEFT, NORM_SPEED) ;
+    //rampSpeed(RIGHT, NORM_SPEED) ;
+    setMotorSpeed(LEFT, NORM_SPEED);
+    setMotorSpeed(RIGHT, NORM_SPEED);
     return ;
 }
 
@@ -117,15 +118,15 @@ void driveTurn(int direction) {
 #ifdef LOCDEBUG
     printf("drive turn %d\n", direction) ;
 #endif
-    //if(leftdir == BACKWARD || rightdir == BACKWARD) stopMotor(STOPTIME) ;
-    if(leftdir == BACKWARD) rampSpeed(LEFT, 0) ;
-    if(rightdir == BACKWARD) rampSpeed(RIGHT, 0) ;
+    if(leftdir == BACKWARD || rightdir == BACKWARD) stopMotor(STOPTIME) ;
+    //if(leftdir == BACKWARD) rampSpeed(LEFT, 1) ;
+    //if(rightdir == BACKWARD) rampSpeed(RIGHT, 1) ;
     motorForward(LEFT) ;
     motorForward(RIGHT) ;
-    rampSpeed(LEFT, direction == LEFT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
-    rampSpeed(RIGHT, direction == LEFT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/4)) ;
-	//setMotorSpeed(LEFT, direction == LEFT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
-	//setMotorSpeed(RIGHT, direction == LEFT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/4)) ;
+    //rampSpeed(LEFT, direction == LEFT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
+    //rampSpeed(RIGHT, direction == LEFT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/4)) ;
+	setMotorSpeed(LEFT, direction == LEFT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
+	setMotorSpeed(RIGHT, direction == LEFT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/4)) ;
    return ;
 }
 
@@ -134,15 +135,15 @@ void backTurn(int direction) {
 #ifdef LOCDEBUG
     printf("back turn %d\n", direction) ;
 #endif
-    //if(leftdir == FORWARD || rightdir == FORWARD) stopMotor(STOPTIME) ;
-    if(leftdir == FORWARD) rampSpeed(LEFT, 0) ;
-    if(rightdir == FORWARD) rampSpeed(RIGHT, 0) ;
+    if(leftdir == FORWARD || rightdir == FORWARD) stopMotor(STOPTIME) ;
+    //if(leftdir == FORWARD) rampSpeed(LEFT, 1) ;
+    //if(rightdir == FORWARD) rampSpeed(RIGHT, 1) ;
     motorBackward(LEFT) ;
     motorBackward(RIGHT) ;
-    rampSpeed(LEFT, direction == RIGHT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
-    rampSpeed(RIGHT, direction == RIGHT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/4)) ;
-    //setMotorSpeed(LEFT, direction == RIGHT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
-	//setMotorSpeed(RIGHT, direction == RIGHT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/4)) ;
+    //rampSpeed(LEFT, direction == RIGHT ? NORM_SPEED - (NORM_SPEED/4) : NORM_SPEED + (NORM_SPEED/4)) ;
+    //rampSpeed(RIGHT, direction == RIGHT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED - (NORM_SPEED/4)) ;
+    setMotorSpeed(LEFT, direction == RIGHT ? NORM_SPEED : NORM_SPEED + (NORM_SPEED/4)) ;
+	setMotorSpeed(RIGHT, direction == RIGHT ? NORM_SPEED + (NORM_SPEED/4) : NORM_SPEED ) ;
 }
 
 // changes directions of motors, does not change PWM (speed)
@@ -178,7 +179,7 @@ void setMotorSpeed(int lr, int speed) {
     // ripped from github
     if(lr == RIGHT) rightSpeed = speed ;
     if(lr == LEFT) leftSpeed = speed ;
-    uint16_t batVoltage = (AD_ReadADPin(BAT_VOLTAGE) * 33) / 1023 ; 
+    uint16_t batVoltage = MAX_VOLTAGE ; 
 	if(speed > 50) {
         speed = 50 ;
     } else if(speed < 0) {
@@ -206,6 +207,7 @@ void rampSpeed(int lr, int speed) {
             } else {
                 break ;
             }
+            wait(5) ;
         }
     } else {
         while(1) {
@@ -216,6 +218,7 @@ void rampSpeed(int lr, int speed) {
             } else {
                 break ;
             }
+            wait(5) ;
         }
     }
     return ;

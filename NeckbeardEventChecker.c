@@ -27,7 +27,7 @@
  ******************************************************************************/
 
 #define WAITTIME 500        // for timer debouncing on bumpers
-#define TAPETIME 500        // for timer debouncing on tape sensors
+#define TAPETIME 100        // for timer debouncing on tape sensors
 
 //states
 #define TRACKLO 0x00        // track wire not sensed
@@ -49,7 +49,9 @@
 #define THRESH_BAN_HI 600   // hi banner threshold
 #define THRESH_BAN_LO 900   // lo banner threshold
 
-#define DIGITAL
+#define DIGITAL // define for analog banner det
+// #define ANALOG   // define for analog banner det (only do digital XOR analog)
+#define TOP // define for the top half of the robot functionality
 
 /*******************************************************************************
  * EVENTCHECKER_TEST SPECIFIC CODE                                                             *
@@ -84,8 +86,9 @@ uint8_t TapeCheck(void) {
     if(PORTY07_BIT) tapeReadings |= 0b000010 ; // 0000 0000 0000 0010, sensor 2
     if(PORTY08_BIT) tapeReadings |= 0b000100 ; // 0000 0000 0000 0100, sensor 3
     if(PORTY09_BIT) tapeReadings |= 0b001000 ; // 0000 0000 0000 1000, sensor 4
-    //if(PORTY10_BIT) tapeReadings |= 0b010000 ; // 0000 0000 0001 0000, sensor 5
+  //if(PORTY10_BIT) tapeReadings |= 0b010000 ; // 0000 0000 0001 0000, sensor 5
     if(PORTY11_BIT) tapeReadings |= 0b100000 ; // 0000 0000 0010 0000, sensor 6
+    // printf("%x\n", tapeReadings) ;
 
     // check if changed
     if (lastTapeRead != tapeReadings) { // check for change from last time
@@ -115,11 +118,12 @@ uint8_t BumperCheck(void) {
     static unsigned int prevTime = 0 ;
 
     // bumpers are active lo
+#ifdef TOP
     if(!PORTZ09_BIT) bumperReadings |= 0b0001 ; // left front
     if(!PORTZ03_BIT) bumperReadings |= 0b0010 ; // right front
     if(!PORTZ11_BIT) bumperReadings |= 0b0100 ; // left back
     if(!PORTZ12_BIT) bumperReadings |= 0b1000 ; // right back
-
+#endif
     if(lastBumperRead != bumperReadings) {
         if( (currentTime > prevTime && currentTime - prevTime > WAITTIME) || 
             (currentTime < prevTime && currentTime + (UINT_MAX-prevTime) > WAITTIME) 
@@ -144,6 +148,7 @@ uint8_t TrackCheck(void) {
     
     unsigned int data = AD_ReadADPin(AD_PORTW3) ;
     // printf("state: %x, data: %d\n", state, data) ;
+#ifdef TOP
     if(state == TRACKLO && data > THI) {        // hi threshold 
         state = TRACKHI ;                       
         thisEvent.EventType = TRACK_SENSED ;
@@ -157,6 +162,7 @@ uint8_t TrackCheck(void) {
         returnVal = TRUE ;
         PostNeckbeardService(thisEvent) ;
     }
+#endif
     return (returnVal) ;
 }
 
@@ -167,6 +173,7 @@ uint8_t BeaconCheck(void) {
     static uint8_t state = BCNLO ;      // used to implement 3 stage hysteresis
     
     unsigned int data = AD_ReadADPin(AD_PORTW4) ;
+#ifdef TOP
     if((state == BCNMID || state == BCNHI) && data < BML) {         // case 1
         state = BCNLO ;
         thisEvent.EventType = BEACON_LOST ;
@@ -192,6 +199,7 @@ uint8_t BeaconCheck(void) {
         returnVal = TRUE ;
         PostNeckbeardService(thisEvent) ;
     }
+#endif
     
     return returnVal ;
 }
@@ -202,6 +210,7 @@ uint8_t BannerCheck(void) {
     uint8_t returnVal = FALSE ;
     static uint8_t state = BNRLO ;
     
+#ifdef TOP
     // read 
 #ifdef ANALOG 
     unsigned int data = AD_ReadADPin(AD_PORTW5) ;
@@ -236,6 +245,8 @@ uint8_t BannerCheck(void) {
         PostNeckbeardService(thisEvent) ;
     }
 #endif
+    
+#endif 
     
     return returnVal ;
 }

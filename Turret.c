@@ -67,3 +67,22 @@ void setPMin(void) {
     setPitch(PITCHLO) ;
     return ;
 }
+
+void reload(void) {
+    int i = 1000 ;
+    while(1) {
+
+        RC_SetPulseTime(RC_PORTV04, i) ;
+        i += 20 ;
+        if(i >= 2000) break ;
+        wait(50) ;
+    }
+    while(1) {
+
+        RC_SetPulseTime(RC_PORTV04, i) ;
+        i -= 20 ;
+        if(i <= 1000) break ;
+        wait(50) ;
+    }
+    return ;
+}
